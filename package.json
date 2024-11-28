@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "lucide-react": "^0.462.0",
+    "react-tabs": "^6.0.2"
+  }
+}
