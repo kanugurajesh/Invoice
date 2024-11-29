@@ -6,6 +6,7 @@ export const processFile = async (file: File) => {
   let data;
 
   try {
+    
     if (fileType.includes('spreadsheet') || fileType.includes('excel')) {
       data = await processExcel(file);
     } else if (fileType.includes('pdf')) {

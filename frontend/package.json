@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@reduxjs/toolkit": "^2.3.0",
     "axios": "^1.7.8",
     "lucide-react": "^0.462.0",

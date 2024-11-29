@@ -22,6 +22,7 @@ const InvoicesTab: React.FC = () => {
       <DataTable data={invoices} columns={columns} />
     </div>
   );
+  
 };
 
 export default InvoicesTab;
