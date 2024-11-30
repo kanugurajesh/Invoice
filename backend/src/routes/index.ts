@@ -51,7 +51,6 @@ const fileFilter = (
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 // routes with multer middleware
-// @ts-ignore
 router.post("/pdf", upload.single("file"), transcribePdf);
 router.post("/excel", upload.single("file"), transcribeExcel);
 router.post("/image", upload.single("file"), transcribeImage);
