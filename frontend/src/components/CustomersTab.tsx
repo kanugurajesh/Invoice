@@ -50,7 +50,8 @@ const CustomersTab: React.FC = () => {
     {
       key: 'totalPurchaseAmount',
       header: 'Total Purchase Amount',
-      render: (value: number) => `$${value.toFixed(2)}`
+      render: (value: any) => `${value}`
+      // render: (value: number) => `$${value.toFixed(2)}`
     },
     {
       key: 'email',
