@@ -48,7 +48,6 @@ const processExcel = async (file: File) => {
 };
 
 const processPDF = async (file: File) => {
-  
   const handleFileUpload = async () => {
     const formData = new FormData();
     formData.append("file", file);
@@ -62,14 +61,10 @@ const processPDF = async (file: File) => {
 
   const data = await handleFileUpload();
 
-  // Process the data and organize it into the required format
-
-  
-
   return {
-    invoices: [],
-    products: [],
-    customers: [],
+    invoices: [data.InvoicesTab],
+    products: [data.ProductsTab],
+    customers: [data.CustomersTab],
   };
 };
 

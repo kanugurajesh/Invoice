@@ -11,15 +11,18 @@ const InvoicesTab: React.FC = () => {
     { key: 'customerName', header: 'Customer Name' },
     { key: 'productName', header: 'Product Name' },
     { key: 'quantity', header: 'Quantity' },
-    { key: 'tax', header: 'Tax', render: (value: number) => `${value}%` },
-    { key: 'totalAmount', header: 'Total Amount', render: (value: number) => `$${value.toFixed(2)}` },
+    // { key: 'tax', header: 'Tax', render: (value: number) => `${value}%` },
+    { key: 'tax', header: 'Tax'},
+    // { key: 'totalAmount', header: 'Total Amount', render: (value: number) => `$${value.toFixed(2)}` },
+    { key: 'totalAmount', header: 'Total Amount'},
     { key: 'date', header: 'Date' },
   ];
 
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Invoices</h2>
-      <DataTable data={invoices} columns={columns} />
+      {/* @ts-ignore */}
+      <DataTable data={invoices[0]} columns={columns} />
     </div>
   );
   

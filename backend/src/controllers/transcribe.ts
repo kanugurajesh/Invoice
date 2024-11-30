@@ -29,6 +29,8 @@ const transcribePdf = async (req: Request, res: Response): Promise<void> => {
 
   const extractedData = response.response.text();
 
+  console.log(extractedData);
+
   const jsonString = JSON.parse(
     extractedData.slice(8, extractedData.length - 4)
   );
