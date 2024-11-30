@@ -24,6 +24,7 @@ const ProductsTab: React.FC = () => {
         updates: { productName: value }
       }));
     }
+    
   };
 
   const columns = [
