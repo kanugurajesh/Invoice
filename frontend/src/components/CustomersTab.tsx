@@ -28,11 +28,11 @@ const CustomersTab: React.FC = () => {
 
   const columns = [
     {
-      key: 'name',
+      key: 'customerName',
       header: 'Customer Name',
       render: (value: string, row: any) => (
         <EditableCell
-          value={value}
+          value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'name', newValue)}
         />
       )
@@ -42,7 +42,7 @@ const CustomersTab: React.FC = () => {
       header: 'Phone Number',
       render: (value: string, row: any) => (
         <EditableCell
-          value={value}
+          value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'phoneNumber', newValue)}
         />
       )
@@ -50,15 +50,19 @@ const CustomersTab: React.FC = () => {
     {
       key: 'totalPurchaseAmount',
       header: 'Total Purchase Amount',
-      render: (value: any) => `${value}`
-      // render: (value: number) => `$${value.toFixed(2)}`
+      render: (value: string | undefined, row: any) => (
+        <EditableCell
+          value={value || '-'}
+          onSave={(newValue) => handleUpdate(row.id, 'amount', newValue)}
+        />
+      )
     },
     {
       key: 'email',
       header: 'Email',
       render: (value: string | undefined, row: any) => (
         <EditableCell
-          value={value || ''}
+          value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'email', newValue)}
         />
       )
@@ -68,7 +72,7 @@ const CustomersTab: React.FC = () => {
       header: 'Address',
       render: (value: string | undefined, row: any) => (
         <EditableCell
-          value={value || ''}
+          value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'address', newValue)}
         />
       )
