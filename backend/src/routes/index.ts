@@ -39,7 +39,7 @@ const fileFilter = (
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
-router.post("/pdf", upload.single("pdf"), transcribePdf);
+router.post("/pdf", upload.single("file"), transcribePdf);
 
 router.post("/excel", transcribeExcel);
 

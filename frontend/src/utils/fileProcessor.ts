@@ -52,7 +52,7 @@ const processPDF = async (file: File) => {
   const handleFileUpload = async () => {
     const formData = new FormData();
     formData.append("file", file);
-    const response = await fetch("/transcribe/pdf", {
+    const response = await fetch("http://localhost:3000/transcribe/pdf", {
       method: "POST",
       body: formData,
     });
