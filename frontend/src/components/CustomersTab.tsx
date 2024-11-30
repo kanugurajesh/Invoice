@@ -77,7 +77,7 @@ const CustomersTab: React.FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Customers</h2>
-      <DataTable data={customers} columns={columns} />
+      <DataTable data={customers[0]} columns={columns} />
     </div>
   );
 };

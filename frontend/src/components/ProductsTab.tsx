@@ -74,7 +74,9 @@ const ProductsTab: React.FC = () => {
     {
       key: 'priceWithTax',
       header: 'Price with Tax',
-      render: (value: number) => `$${value.toFixed(2)}`
+      render: (value: any) => `$${value}`
+      // render: (value: number | undefined) => 
+      //   typeof value === 'number' ? `$${value.toFixed(2)}` : '$0.00'
     },
     {
       key: 'discount',
@@ -92,7 +94,7 @@ const ProductsTab: React.FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Products</h2>
-      <DataTable data={products} columns={columns} />
+      <DataTable data={products[0]} columns={columns} />
     </div>
   );
 };

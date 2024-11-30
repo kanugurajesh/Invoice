@@ -16,6 +16,8 @@ export const processFile = async (file: File) => {
       throw new Error("Unsupported file type");
     }
 
+    return data
+
     return data;
   } catch (error) {
     console.error("Error processing file:", error);
