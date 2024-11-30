@@ -43,6 +43,7 @@ const transcribePdf = async (req: Request, res: Response): Promise<void> => {
   res.json(jsonString);
 
   return;
+  
 };
 
 const transcribeImage = async (req: Request, res: Response) => {
