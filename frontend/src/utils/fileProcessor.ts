@@ -1,25 +1,24 @@
-import * as XLSX from 'xlsx';
-import { Invoice, Product, Customer } from '../types';
+import * as XLSX from "xlsx";
+import { Invoice, Product, Customer } from "../types";
 
 export const processFile = async (file: File) => {
   const fileType = file.type;
   let data;
 
   try {
-    
-    if (fileType.includes('spreadsheet') || fileType.includes('excel')) {
+    if (fileType.includes("spreadsheet") || fileType.includes("excel")) {
       data = await processExcel(file);
-    } else if (fileType.includes('pdf')) {
+    } else if (fileType.includes("pdf")) {
       data = await processPDF(file);
-    } else if (fileType.includes('image')) {
+    } else if (fileType.includes("image")) {
       data = await processImage(file);
     } else {
-      throw new Error('Unsupported file type');
+      throw new Error("Unsupported file type");
     }
 
     return data;
   } catch (error) {
-    console.error('Error processing file:', error);
+    console.error("Error processing file:", error);
     throw error;
   }
 };
@@ -27,14 +26,14 @@ export const processFile = async (file: File) => {
 const processExcel = async (file: File) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: "array" });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        
+
         // Process the data and organize it into the required format
         const processed = organizeData(jsonData);
         resolve(processed);
@@ -42,16 +41,27 @@ const processExcel = async (file: File) => {
         reject(error);
       }
     };
-    
+
     reader.onerror = (error) => reject(error);
     reader.readAsArrayBuffer(file);
   });
 };
 
 const processPDF = async (file: File) => {
-  // Implement PDF processing logic here
-  // This would typically involve using a PDF parsing library
-  // For now, return mock data
+  
+  const handleFileUpload = async () => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await fetch("/transcribe/pdf", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await response.json();
+    return data;
+  };
+
+  await handleFileUpload();
+
   return {
     invoices: [],
     products: [],
