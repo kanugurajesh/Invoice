@@ -23,7 +23,7 @@ const CustomersTab: React.FC = () => {
         customerId,
         updates: { customerName: value }
       }));
-    }
+    }    
   };
 
   const columns = [

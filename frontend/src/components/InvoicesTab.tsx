@@ -6,8 +6,6 @@ import DataTable from "./DataTable";
 const InvoicesTab: React.FC = () => {
   const invoices = useSelector((state: RootState) => state.invoices.items);
 
-  // console.log(invoices)
-
   const columns = [
     { key: "serialNumber", header: "Serial Number" },
     { key: "customerName", header: "Customer Name" },
