@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "fs";
 import pdf from "pdf-parse";
 import { extractDataPrompt } from "../helpers/data";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -27,9 +27,19 @@ const transcribePdf = async (req: Request, res: Response): Promise<void> => {
 
   const response = await model.generateContent(extractDataPrompt + text);
 
-  console.log(response.response.text());
+  const extractedData = response.response.text();
 
-  res.json({ message: "Transcribe PDF" });
+  const jsonString = JSON.parse(
+    extractedData.slice(8, extractedData.length - 4)
+  );
+
+  if (jsonString.error) {
+    res.json({ message: jsonString.error });
+    return;
+  }
+
+  res.json(jsonString);
+
   return;
 };
 

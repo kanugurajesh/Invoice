@@ -60,7 +60,11 @@ const processPDF = async (file: File) => {
     return data;
   };
 
-  await handleFileUpload();
+  const data = await handleFileUpload();
+
+  // Process the data and organize it into the required format
+
+  
 
   return {
     invoices: [],
