@@ -6,6 +6,13 @@ import { processFile } from '../utils/fileProcessor';
 import { setProducts } from '../store/slices/productsSlice';
 import { setCustomers } from '../store/slices/customersSlice';
 import { setInvoices } from '../store/slices/invoicesSlice';
+import { Product, Customer, Invoice } from '../types';
+
+interface ProcessedData {
+  products: Product[];
+  customers: Customer[];
+  invoices: Invoice[];
+}
 
 const FileUpload: React.FC = () => {
   const dispatch = useDispatch();
@@ -23,10 +30,10 @@ const FileUpload: React.FC = () => {
         closeButton: false
       });
 
-      const data = await processFile(file);
+      const data = await processFile(file) as ProcessedData;
 
       // Validate the extracted data
-      if (!data.products || !data.customers || !data.invoices) {
+      if (!Array.isArray(data.products) || !Array.isArray(data.customers) || !Array.isArray(data.invoices)) {
         throw new Error('Invalid data structure in file');
       }
 
