@@ -1,7 +1,9 @@
+const BASE_URL = 'http://localhost:3000';
+
 const urls = {
-    transcribePdf: "http://localhost:3000/transcribe/pdf",
-    transcribeExcel: "http://localhost:3000/transcribe/excel",
-    transcribeImage: "http://localhost:3000/transcribe/image",
+    transcribePdf: `${BASE_URL}/transcribe/pdf`,
+    transcribeExcel: `${BASE_URL}/transcribe/excel`,
+    transcribeImage: `${BASE_URL}/transcribe/image`,
 }
 
 export default urls;

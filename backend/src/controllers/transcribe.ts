@@ -46,18 +46,63 @@ const transcribePdf = async (req: Request, res: Response): Promise<void> => {
   
 };
 
-const transcribeImage = async (req: Request, res: Response) => {
-  res.json({ message: "Transcribe Image" });
-};
+const visionModel = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
 
-const transcribeExcel = async (req: Request, res: Response) => {
-  if (!req.file) {
-    res.json({ message: "No file uploaded" });
-    return;
+const transcribeImage = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ message: "No file uploaded" });
+      return;
+    }
+
+    const imageBuffer = fs.readFileSync(req.file.path);
+    
+    const imageBase64 = imageBuffer.toString('base64');
+
+    const imagePart = {
+      inlineData: {
+        data: imageBase64,
+        mimeType: req.file.mimetype
+      }
+    };
+
+    const result = await visionModel.generateContent([
+      extractDataPrompt,
+      imagePart
+    ]);
+
+    const response = await result.response;
+    const text = response.text();
+
+    fs.unlinkSync(req.file.path);
+
+    try {
+      const jsonString = JSON.parse(
+        text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1)
+      );
+
+      if (jsonString.error) {
+        res.status(400).json({ message: jsonString.error });
+        return;
+      }
+
+      res.json(jsonString);
+    } catch (error) {
+      console.error("Error parsing JSON from Gemini response:", error);
+      console.log("Raw response:", text);
+      res.status(500).json({ 
+        message: "Failed to parse response data",
+        rawResponse: text 
+      });
+    }
+
+  } catch (error) {
+    console.error("Error processing image:", error);
+    res.status(500).json({ 
+      message: "Failed to process image",
+      error: error instanceof Error ? error.message : "Unknown error" 
+    });
   }
-
-  
-
 };
 
-export { transcribePdf, transcribeImage, transcribeExcel };
+export { transcribePdf, transcribeImage };
