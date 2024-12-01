@@ -6,11 +6,24 @@ import InvoicesTab from './components/InvoicesTab';
 import ProductsTab from './components/ProductsTab';
 import CustomersTab from './components/CustomersTab';
 import { FileText, Package, Users } from 'lucide-react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <Provider store={store}>
       <div className="min-h-screen bg-gray-100">
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Swipe Invoice Manager</h1>
