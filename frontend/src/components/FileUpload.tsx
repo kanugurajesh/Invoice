@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { ClipLoader } from 'react-spinners';
 import { toast } from 'react-toastify';
-import { processFile } from '../utils/fileProcessor';
+import { processFile, validateData } from '../utils/fileProcessor';
 import { setProducts } from '../store/slices/productsSlice';
 import { setCustomers } from '../store/slices/customersSlice';
 import { setInvoices } from '../store/slices/invoicesSlice';
@@ -37,6 +37,18 @@ const FileUpload: React.FC = () => {
         throw new Error('Invalid data structure in file');
       }
 
+      // Validate data using validateData function
+      const validationErrors = validateData(data);
+      if (validationErrors.length > 0) {
+        // Show validation errors as warnings
+        validationErrors.forEach(error => {
+          toast.warning(error, {
+            position: "top-right",
+            autoClose: 5000
+          });
+        });
+      }
+
       // Update store with extracted data
       dispatch(setProducts(data.products));
       dispatch(setCustomers(data.customers));
@@ -45,6 +57,12 @@ const FileUpload: React.FC = () => {
       // Close processing notification and show success
       toast.dismiss(processingToast);
       toast.success('File processed successfully!');
+
+      if (validationErrors.length > 0) {
+        toast.info('Some data may be incomplete. Please review and update as needed.', {
+          autoClose: 7000
+        });
+      }
 
     } catch (error) {
       console.error('File processing error:', error);

@@ -1,17 +1,75 @@
 import * as XLSX from "xlsx";
 import { Invoice, Product, Customer } from "../types";
+import urls from "../data";
 
 interface ExcelRow {
   [key: string]: any;
 }
 
-const findColumnName = (headers: string[], possibleNames: string[]): string | undefined => {
-  return headers.find(header => 
-    possibleNames.some(name => 
-      header.toLowerCase().includes(name.toLowerCase())
-    )
-  );
-};
+// interface ColumnMapping {
+//   [key: string]: {
+//     possibleNames: string[];
+//     required: boolean;
+//     transform?: (value: any) => any;
+//   };
+// }
+
+// const COLUMN_MAPPINGS: ColumnMapping = {
+//   serialNumber: {
+//     possibleNames: ['Serial Number', 'SerialNumber', 'Invoice Number'],
+//     required: true,
+//   },
+//   customerName: {
+//     possibleNames: ['Party Name'],
+//     required: true,
+//   },
+//   companyName: {
+//     possibleNames: ['Party Company Name'],
+//     required: false,
+//   },
+//   productName: {
+//     possibleNames: ['Party Name'],
+//     required: true,
+//   },
+//   quantity: {
+//     possibleNames: ['Quantity'],
+//     required: false,
+//     transform: (value: any) => Number(value) || 1,
+//   },
+//   unitPrice: {
+//     possibleNames: ['Net Amount'],
+//     required: true,
+//     transform: (value: any) => Number(value) || 0,
+//   },
+//   tax: {
+//     possibleNames: ['Tax Amount'],
+//     required: false,
+//     transform: (value: any) => Number(value) || 0,
+//   },
+//   totalAmount: {
+//     possibleNames: ['Total Amount'],
+//     required: true,
+//     transform: (value: any) => Number(value) || 0,
+//   },
+//   date: {
+//     possibleNames: ['Date'],
+//     required: true,
+//     transform: (value: any) => {
+//       if (!value) return new Date().toISOString();
+//       return new Date(value).toISOString();
+//     },
+//   },
+// };
+
+// const findMatchingColumn = (headers: string[], possibleNames: string[]): string | undefined => {
+//   const headerLower = headers.map(h => h.toLowerCase());
+//   return headers.find((_, index) => 
+//     possibleNames.some(name => 
+//       headerLower[index].includes(name.toLowerCase()) || 
+//       name.toLowerCase().includes(headerLower[index])
+//     )
+//   );
+// };
 
 export const processFile = async (file: File) => {
   const fileType = file.type;
@@ -48,104 +106,108 @@ const processExcel = async (file: File): Promise<{
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
         const workbook = XLSX.read(data, { type: "array" });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rawData = XLSX.utils.sheet_to_json<ExcelRow>(sheet, { header: "A" });
+        const rawData = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
 
-        // Get headers from the first row
-        const headers = Object.keys(rawData[0] || {}).map(key => rawData[0][key]?.toString() || '');
-        console.log('Excel Headers:', headers);
-
-        // Define possible column names
-        const columnMappings = {
-          productName: ['Product Name', 'ProductName', 'Item Name', 'Description', 'Product'],
-          quantity: ['Qty', 'Quantity', 'QTY', 'Count'],
-          unitPrice: ['Unit Price', 'UnitPrice', 'Price', 'Rate'],
-          tax: ['Tax (%)', 'Tax', 'GST', 'VAT'],
-          priceWithTax: ['Price with Tax', 'Total Price', 'Final Price'],
-          customerName: ['Party Name', 'Customer Name', 'Client', 'Customer'],
-          companyName: ['Party Company Name', 'Company Name', 'Organization'],
-          serialNumber: ['Serial Number', 'Invoice Number', 'Bill Number'],
-          date: ['Invoice Date', 'Date', 'Bill Date'],
-          totalAmount: ['Total Amount', 'Net Amount', 'Final Amount']
-        };
-
-        // Find actual column names in the Excel
-        const actualColumns: { [key: string]: string } = {};
-        Object.entries(columnMappings).forEach(([key, possibleNames]) => {
-          actualColumns[key] = findColumnName(headers, possibleNames) || '';
-        });
-
-        console.log('Mapped Columns:', actualColumns);
-
-        // Skip header row
-        const dataRows = rawData.slice(1);
+        console.log('Raw Excel Data:', rawData);
 
         const productsMap = new Map<string, Product>();
         const customersMap = new Map<string, Customer>();
         const invoices: Invoice[] = [];
 
-        dataRows.forEach((row, index) => {
-          // Extract product name using flexible matching
-          let productName = '';
-          if (actualColumns.productName) {
-            productName = row[actualColumns.productName]?.toString() || '';
-          } else {
-            // Try to find a column that might contain product name
-            const possibleProductColumn = Object.entries(row).find(([_, value]) => 
-              typeof value === 'string' && value.length > 0 && 
-              !value.includes('charge') && !value.includes('shipping')
-            );
-            if (possibleProductColumn) {
-              productName = possibleProductColumn[1].toString();
-            }
+        // Helper function to find value from multiple possible column names
+        const findValue = (row: ExcelRow, possibleNames: string[]): string => {
+          for (const name of possibleNames) {
+            if (row[name] !== undefined) return String(row[name]);
           }
+          return '';
+        };
 
-          if (productName && !productsMap.has(productName)) {
-            const product: Product = {
-              id: `product-${index}`,
-              name: productName,
-              quantity: Number(row[actualColumns.quantity] || 0),
-              unitPrice: Number(row[actualColumns.unitPrice] || 0),
-              tax: Number(row[actualColumns.tax] || 0),
-              priceWithTax: Number(row[actualColumns.priceWithTax] || 0)
-            };
-            productsMap.set(productName, product);
+        // Helper function to find numeric value
+        const findNumericValue = (row: ExcelRow, possibleNames: string[]): number => {
+          for (const name of possibleNames) {
+            if (row[name] !== undefined) return Number(row[name]) || 0;
           }
+          return 0;
+        };
 
-          // Extract customer information
-          const customerName = row[actualColumns.customerName] || row[actualColumns.companyName] || 'Unknown Customer';
-          if (customerName && !customersMap.has(customerName.toString())) {
+        rawData.forEach((row, index) => {
+          // Try to find values using multiple possible column names
+          const serialNumber = findValue(row, [
+            'Serial Number', 'SerialNumber', 'Invoice Number', 'Bill Number',
+            'Invoice No', 'Serial No'
+          ]) || `INV-${index + 1}`;
+
+          const companyName = findValue(row, [
+            'Party Company Name', 'Company Name', 'Organization', 'Business Name'
+          ]);
+
+          const partyName = findValue(row, [
+            'Party Name', 'Customer Name', 'Client Name', 'Name', 'Customer'
+          ]);
+
+          const netAmount = findNumericValue(row, [
+            'Net Amount', 'Amount', 'Price', 'Unit Price', 'Base Amount'
+          ]);
+
+          const taxAmount = findNumericValue(row, [
+            'Tax Amount', 'Tax', 'GST', 'VAT', 'Tax Value'
+          ]);
+
+          const totalAmount = findNumericValue(row, [
+            'Total Amount', 'Total', 'Final Amount', 'Gross Amount', 'Amount with Tax'
+          ]);
+
+          const dateValue = findValue(row, [
+            'Date', 'Invoice Date', 'Bill Date', 'Transaction Date'
+          ]);
+
+          // Create customer key
+          const customerKey = companyName && partyName 
+            ? `${companyName} - ${partyName}`
+            : companyName || partyName || 'Unknown Customer';
+
+          // Create or update customer
+          if (!customersMap.has(customerKey)) {
             const customer: Customer = {
               id: `customer-${index}`,
-              name: customerName.toString(),
-              phoneNumber: 'N/A',
-              totalPurchaseAmount: Number(row[actualColumns.totalAmount] || 0)
+              name: customerKey,
+              phoneNumber: findValue(row, ['Phone', 'Phone Number', 'Contact', 'Mobile']) || 'N/A',
+              totalPurchaseAmount: totalAmount
             };
-            customersMap.set(customerName.toString(), customer);
+            customersMap.set(customerKey, customer);
+          } else {
+            // Update existing customer's total purchase amount
+            const existingCustomer = customersMap.get(customerKey)!;
+            existingCustomer.totalPurchaseAmount += totalAmount;
+            customersMap.set(customerKey, existingCustomer);
           }
+
+          // Create product
+          const productName = partyName || `Product-${index}`;
+          const product: Product = {
+            id: `product-${index}`,
+            name: productName,
+            quantity: findNumericValue(row, ['Quantity', 'Qty', 'Count']) || 1,
+            unitPrice: netAmount,
+            tax: taxAmount,
+            priceWithTax: totalAmount
+          };
+          productsMap.set(`${productName}-${index}`, product);
 
           // Create invoice
-          if (productName && customerName) {
-            const product = productsMap.get(productName);
-            const customer = customersMap.get(customerName.toString());
-
-            if (product && customer) {
-              const invoice: Invoice = {
-                id: `invoice-${index}`,
-                serialNumber: String(row[actualColumns.serialNumber] || `INV-${index + 1}`),
-                customerId: customer.id,
-                customerName: customer.name,
-                productId: product.id,
-                productName: product.name,
-                quantity: Number(row[actualColumns.quantity] || 1),
-                tax: Number(row[actualColumns.tax] || 0),
-                totalAmount: Number(row[actualColumns.totalAmount] || 0),
-                date: row[actualColumns.date] 
-                  ? new Date(row[actualColumns.date]).toISOString() 
-                  : new Date().toISOString()
-              };
-              invoices.push(invoice);
-            }
-          }
+          const invoice: Invoice = {
+            id: `invoice-${index}`,
+            serialNumber: serialNumber,
+            customerId: `customer-${index}`,
+            customerName: customerKey,
+            productId: `product-${index}`,
+            productName: productName,
+            quantity: product.quantity,
+            tax: taxAmount,
+            totalAmount: totalAmount,
+            date: dateValue ? new Date(dateValue).toISOString() : new Date().toISOString()
+          };
+          invoices.push(invoice);
         });
 
         const processedData = {
@@ -155,11 +217,10 @@ const processExcel = async (file: File): Promise<{
         };
 
         console.log('Processed Data:', processedData);
-
         resolve(processedData);
+
       } catch (error) {
         console.error('Excel processing error details:', error);
-        console.error('Stack trace:', error instanceof Error ? error.stack : '');
         reject(error);
       }
     };
@@ -172,36 +233,40 @@ const processExcel = async (file: File): Promise<{
 const processPDF = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await fetch("http://localhost:3000/transcribe/pdf", {
+  const response = await fetch(urls.transcribePdf, {
     method: "POST",
     body: formData,
   });
   const data = await response.json();
-  
+
   // First create products and customers with IDs
-  const products = Array.isArray(data.ProductsTab) 
+  const products = Array.isArray(data.ProductsTab)
     ? data.ProductsTab.map((product: any, index: number) => ({
         ...product,
         id: product.id || `product-${index}`,
-        name: product.name || product.productName // handle both name formats
+        name: product.name || product.productName, // handle both name formats
       }))
-    : [{ ...data.ProductsTab, id: 'product-0' }];
+    : [{ ...data.ProductsTab, id: "product-0" }];
 
   const customers = Array.isArray(data.CustomersTab)
     ? data.CustomersTab.map((customer: any, index: number) => ({
         ...customer,
         id: customer.id || `customer-${index}`,
-        name: customer.customerName || customer.name // handle both name formats
+        name: customer.customerName || customer.name, // handle both name formats
       }))
-    : [{ ...data.CustomersTab, id: 'customer-0' }];
+    : [{ ...data.CustomersTab, id: "customer-0" }];
 
   // Then create invoices with proper relationships
   const invoices = Array.isArray(data.InvoicesTab)
     ? data.InvoicesTab.map((invoice: any, index: number) => {
         // Find corresponding product and customer
-        const product = products.find((p: { name: string }) => p.name === invoice.productName);
-        const customer = customers.find((c: { name: string }) => c.name === invoice.customerName);
-        
+        const product = products.find(
+          (p: { name: string }) => p.name === invoice.productName
+        );
+        const customer = customers.find(
+          (c: { name: string }) => c.name === invoice.customerName
+        );
+
         return {
           ...invoice,
           id: invoice.id || `invoice-${index}`,
@@ -209,12 +274,14 @@ const processPDF = async (file: File) => {
           customerId: customer?.id || `customer-unknown`,
         };
       })
-    : [{
-        ...data.InvoicesTab,
-        id: 'invoice-0',
-        productId: 'product-0',
-        customerId: 'customer-0'
-      }];
+    : [
+        {
+          ...data.InvoicesTab,
+          id: "invoice-0",
+          productId: "product-0",
+          customerId: "customer-0",
+        },
+      ];
 
   return { products, customers, invoices };
 };
@@ -230,11 +297,15 @@ const processImage = async (file: File) => {
   };
 };
 
-export const validateData = (data: { products: Product[], customers: Customer[], invoices: Invoice[] }) => {
+export const validateData = (data: {
+  products: Product[];
+  customers: Customer[];
+  invoices: Invoice[];
+}) => {
   const errors: string[] = [];
 
   // Validate products
-  data.products.forEach(product => {
+  data.products.forEach((product) => {
     if (!product.name?.trim()) {
       errors.push(`Missing product name for product ID: ${product.id}`);
     }
@@ -250,7 +321,7 @@ export const validateData = (data: { products: Product[], customers: Customer[],
   });
 
   // Validate customers
-  data.customers.forEach(customer => {
+  data.customers.forEach((customer) => {
     if (!customer.name?.trim()) {
       errors.push(`Missing customer name for customer ID: ${customer.id}`);
     }
@@ -260,15 +331,19 @@ export const validateData = (data: { products: Product[], customers: Customer[],
   });
 
   // Validate invoices
-  data.invoices.forEach(invoice => {
+  data.invoices.forEach((invoice) => {
     if (!invoice.serialNumber?.trim()) {
       errors.push(`Missing serial number for invoice ID: ${invoice.id}`);
     }
     if (!invoice.customerId) {
-      errors.push(`Missing customer reference for invoice: ${invoice.serialNumber}`);
+      errors.push(
+        `Missing customer reference for invoice: ${invoice.serialNumber}`
+      );
     }
     if (!invoice.productId) {
-      errors.push(`Missing product reference for invoice: ${invoice.serialNumber}`);
+      errors.push(
+        `Missing product reference for invoice: ${invoice.serialNumber}`
+      );
     }
     if (!invoice.quantity || invoice.quantity <= 0) {
       errors.push(`Invalid quantity for invoice: ${invoice.serialNumber}`);
