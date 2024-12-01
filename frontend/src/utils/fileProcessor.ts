@@ -62,9 +62,9 @@ const processPDF = async (file: File) => {
   const data = await handleFileUpload();
 
   return {
-    invoices: [data.InvoicesTab],
-    products: [data.ProductsTab],
-    customers: [data.CustomersTab],
+    invoices: Array.isArray(data.InvoicesTab) ? data.InvoicesTab : [data.InvoicesTab],
+    products: Array.isArray(data.ProductsTab) ? data.ProductsTab : [data.ProductsTab],
+    customers: Array.isArray(data.CustomersTab) ? data.CustomersTab : [data.CustomersTab],
   };
 };
 

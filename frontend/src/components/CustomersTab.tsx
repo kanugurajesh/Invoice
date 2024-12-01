@@ -5,10 +5,16 @@ import { updateCustomer } from '../store/slices/customersSlice';
 import { updateInvoicesByCustomer } from '../store/slices/invoicesSlice';
 import DataTable from './DataTable';
 import EditableCell from './EditableCell';
+import { Customer } from '../types';
 
 const CustomersTab: React.FC = () => {
   const dispatch = useDispatch();
-  const customers = useSelector((state: RootState) => state.customers.items);
+  const customers = useSelector((state: RootState) => {
+    const items = state.customers.items;
+    const flattenedItems = items.flat();
+    console.log('Flattened customers data:', flattenedItems);
+    return flattenedItems;
+  });
 
   const handleUpdate = (customerId: string, field: string, value: any) => {
     const customer = customers.find(c => c.id === customerId);
@@ -28,9 +34,9 @@ const CustomersTab: React.FC = () => {
 
   const columns = [
     {
-      key: 'customerName',
+      key: 'name',
       header: 'Customer Name',
-      render: (value: string, row: any) => (
+      render: (value: string, row: Customer) => (
         <EditableCell
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'name', newValue)}
@@ -40,7 +46,7 @@ const CustomersTab: React.FC = () => {
     {
       key: 'phoneNumber',
       header: 'Phone Number',
-      render: (value: string, row: any) => (
+      render: (value: string, row: Customer) => (
         <EditableCell
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'phoneNumber', newValue)}
@@ -50,17 +56,18 @@ const CustomersTab: React.FC = () => {
     {
       key: 'totalPurchaseAmount',
       header: 'Total Purchase Amount',
-      render: (value: string | undefined, row: any) => (
+      render: (value: number, row: Customer) => (
         <EditableCell
-          value={value || '-'}
-          onSave={(newValue) => handleUpdate(row.id, 'amount', newValue)}
+          value={value ?? 0}
+          onSave={(newValue) => handleUpdate(row.id, 'totalPurchaseAmount', Number(newValue))}
+          type="number"
         />
       )
     },
     {
       key: 'email',
       header: 'Email',
-      render: (value: string | undefined, row: any) => (
+      render: (value: string | undefined, row: Customer) => (
         <EditableCell
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'email', newValue)}
@@ -70,7 +77,7 @@ const CustomersTab: React.FC = () => {
     {
       key: 'address',
       header: 'Address',
-      render: (value: string | undefined, row: any) => (
+      render: (value: string | undefined, row: Customer) => (
         <EditableCell
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'address', newValue)}
@@ -79,10 +86,20 @@ const CustomersTab: React.FC = () => {
     },
   ];
 
+  // Add debug render to check if we have data
+  if (!customers || customers.length === 0) {
+    return (
+      <div className="p-4">
+        <h2 className="text-xl font-semibold mb-4">Customers</h2>
+        <p>No customers available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Customers</h2>
-      <DataTable data={customers[0]} columns={columns} />
+      <DataTable data={customers} columns={columns} />
     </div>
   );
 };

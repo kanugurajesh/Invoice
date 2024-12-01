@@ -4,7 +4,7 @@ import { Upload } from "lucide-react";
 import { processFile } from "../utils/fileProcessor";
 import { useDispatch } from "react-redux";
 import { addInvoice } from "../store/slices/invoicesSlice";
-import { addProduct } from "../store/slices/productsSlice";
+import { setProducts } from "../store/slices/productsSlice";
 import { addCustomer } from "../store/slices/customersSlice";
 
 const FileUpload: React.FC = () => {
@@ -17,8 +17,9 @@ const FileUpload: React.FC = () => {
           // @ts-ignore
           const { invoices, products, customers } = await processFile(file);
 
+          dispatch(setProducts(products));
+          
           invoices.forEach((invoice: any) => dispatch(addInvoice(invoice)));
-          products.forEach((product: any) => dispatch(addProduct(product)));
           customers.forEach((customer: any) => dispatch(addCustomer(customer)));
         } catch (error) {
           console.error("Error processing file:", error);
