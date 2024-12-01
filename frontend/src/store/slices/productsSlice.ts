@@ -24,9 +24,18 @@ const productsSlice = createSlice({
       state.items.push(action.payload);
     },
     updateProduct: (state, action: PayloadAction<Product>) => {
+      console.log('Updating product:', action.payload);
       const index = state.items.findIndex(item => item.id === action.payload.id);
+      console.log('Found product at index:', index);
       if (index !== -1) {
-        state.items[index] = action.payload;
+        const updatedProduct = {
+          ...action.payload,
+          priceWithTax: action.payload.tax !== undefined && action.payload.unitPrice !== undefined
+            ? action.payload.unitPrice * (1 + action.payload.tax/100)
+            : state.items[index].priceWithTax
+        };
+        console.log('Updated product:', updatedProduct);
+        state.items[index] = updatedProduct;
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {

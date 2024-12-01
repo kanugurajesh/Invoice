@@ -56,16 +56,51 @@ const processPDF = async (file: File) => {
       body: formData,
     });
     const data = await response.json();
-    return data;
+    
+    // First create products and customers with IDs
+    const products = Array.isArray(data.ProductsTab) 
+      ? data.ProductsTab.map((product: any, index: number) => ({
+          ...product,
+          id: product.id || `product-${index}`,
+          name: product.name || product.productName // handle both name formats
+        }))
+      : [{ ...data.ProductsTab, id: 'product-0' }];
+
+    const customers = Array.isArray(data.CustomersTab)
+      ? data.CustomersTab.map((customer: any, index: number) => ({
+          ...customer,
+          id: customer.id || `customer-${index}`,
+          name: customer.customerName || customer.name // handle both name formats
+        }))
+      : [{ ...data.CustomersTab, id: 'customer-0' }];
+
+    // Then create invoices with proper relationships
+    const invoices = Array.isArray(data.InvoicesTab)
+      ? data.InvoicesTab.map((invoice: any, index: number) => {
+          // Find corresponding product and customer
+          const product = products.find((p: { name: string }) => p.name === invoice.productName);
+          const customer = customers.find((c: { name: string }) => c.name === invoice.customerName);
+          
+          return {
+            ...invoice,
+            id: invoice.id || `invoice-${index}`,
+            productId: product?.id || `product-unknown`,
+            customerId: customer?.id || `customer-unknown`,
+          };
+        })
+      : [{
+          ...data.InvoicesTab,
+          id: 'invoice-0',
+          productId: 'product-0',
+          customerId: 'customer-0'
+        }];
+
+    console.log('Processed data:', { products, customers, invoices });
+    return { products, customers, invoices };
   };
 
   const data = await handleFileUpload();
-
-  return {
-    invoices: Array.isArray(data.InvoicesTab) ? data.InvoicesTab : [data.InvoicesTab],
-    products: Array.isArray(data.ProductsTab) ? data.ProductsTab : [data.ProductsTab],
-    customers: Array.isArray(data.CustomersTab) ? data.CustomersTab : [data.CustomersTab],
-  };
+  return data;
 };
 
 const processImage = async (file: File) => {

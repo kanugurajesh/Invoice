@@ -7,7 +7,7 @@ interface Column {
 }
 
 interface DataTableProps {
-  data: any;
+  data: any[];
   columns: Column[];
 }
 
@@ -28,11 +28,14 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((row: any, index: number) => (
-            <tr key={index} className="hover:bg-gray-50">
+          {Array.isArray(data) && data.map((row) => (
+            <tr key={row.id || Math.random().toString()} className="hover:bg-gray-50">
               {columns.map((column) => (
-                <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {column.render ? column.render(row[column.key], row) : row[column.key]}
+                <td key={`${row.id}-${column.key}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {column.render 
+                    ? column.render(row[column.key], row)
+                    : row[column.key]
+                  }
                 </td>
               ))}
             </tr>
@@ -43,4 +46,4 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns }) => {
   );
 };
 
-export default DataTable;
+export default React.memo(DataTable);

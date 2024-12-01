@@ -24,9 +24,16 @@ const customersSlice = createSlice({
       state.items.push(action.payload);
     },
     updateCustomer: (state, action: PayloadAction<Customer>) => {
+      console.log('Updating customer:', action.payload);
       const index = state.items.findIndex(item => item.id === action.payload.id);
+      console.log('Found customer at index:', index);
       if (index !== -1) {
-        state.items[index] = action.payload;
+        const updatedCustomer = {
+          ...action.payload,
+          totalPurchaseAmount: action.payload.totalPurchaseAmount ?? state.items[index].totalPurchaseAmount
+        };
+        console.log('Updated customer:', updatedCustomer);
+        state.items[index] = updatedCustomer;
       }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
