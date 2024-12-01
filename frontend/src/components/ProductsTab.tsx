@@ -18,14 +18,14 @@ const ProductsTab: React.FC = () => {
     dispatch(updateProduct(updatedProduct));
 
     // Update related invoices
-    if (field === "name") {
-      dispatch(
-        updateInvoicesByProduct({
-          productId,
-          updates: { productName: value },
-        })
-      );
-    }
+    // if (field === "name") {
+    //   dispatch(
+    //     updateInvoicesByProduct({
+    //       productId,
+    //       updates: { productName: value },
+    //     })
+    //   );
+    // }
   };
 
   const columns = [
@@ -75,7 +75,7 @@ const ProductsTab: React.FC = () => {
     {
       key: "priceWithTax",
       header: "Price with Tax",
-      render: (value: string | 0, row: any) => (
+      render: (value: any, row: any) => (
         <EditableCell
           value={value || 0}
           onSave={(newValue) => handleUpdate(row.id, "priceWithTax", newValue)}
