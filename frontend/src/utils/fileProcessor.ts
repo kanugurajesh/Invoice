@@ -115,18 +115,122 @@ const processImage = async (file: File) => {
 };
 
 const organizeData = (rawData: any[]) => {
+  const productsMap = new Map<string, Product>();
+  const customersMap = new Map<string, Customer>();
   const invoices: Invoice[] = [];
-  const products: Product[] = [];
-  const customers: Customer[] = [];
 
-  // Process raw data and organize it into the appropriate arrays
-  // This is a simplified example - you would need to implement the actual logic
-  // based on your data structure
+  rawData.forEach((row: any, index: number) => {
+    try {
+      // Extract product information
+      const productName = row['Product Name'] || row['ProductName'] || row['product_name'] || row['productName'];
+      if (productName && !productsMap.has(productName)) {
+        const product: Product = {
+          id: `product-${index}`,
+          name: productName,
+          quantity: Number(row['Quantity'] || row['quantity'] || 0),
+          unitPrice: Number(row['Unit Price'] || row['UnitPrice'] || row['unit_price'] || 0),
+          tax: Number(row['Tax'] || row['tax'] || 0),
+          priceWithTax: 0
+        };
+        
+        // Calculate price with tax
+        product.priceWithTax = product.unitPrice * (1 + product.tax / 100);
+        productsMap.set(productName, product);
+      }
 
-  return { invoices, products, customers };
+      // Extract customer information
+      const customerName = row['Customer Name'] || row['CustomerName'] || row['customer_name'] || row['customerName'];
+      if (customerName && !customersMap.has(customerName)) {
+        const customer: Customer = {
+          id: `customer-${index}`,
+          name: customerName,
+          phoneNumber: String(row['Phone Number'] || row['PhoneNumber'] || row['phone_number'] || row['phone'] || ''),
+          totalPurchaseAmount: Number(row['Total Amount'] || row['TotalAmount'] || row['total_amount'] || 0)
+        };
+        customersMap.set(customerName, customer);
+      }
+
+      // Create invoice entry
+      if (productName && customerName) {
+        const product = productsMap.get(productName)!;
+        const customer = customersMap.get(customerName)!;
+        
+        const invoice: Invoice = {
+          id: `invoice-${index}`,
+          serialNumber: String(row['Serial Number'] || row['SerialNumber'] || row['serial_number'] || index + 1),
+          customerId: customer.id,
+          customerName: customer.name,
+          productId: product.id,
+          productName: product.name,
+          quantity: Number(row['Quantity'] || row['quantity'] || 0),
+          tax: product.tax,
+          totalAmount: product.priceWithTax * Number(row['Quantity'] || row['quantity'] || 0),
+          date: new Date(row['Date'] || row['date'] || Date.now()).toISOString()
+        };
+        invoices.push(invoice);
+
+        // Update customer's total purchase amount
+        const currentCustomer = customersMap.get(customerName)!;
+        currentCustomer.totalPurchaseAmount += invoice.totalAmount;
+        customersMap.set(customerName, currentCustomer);
+      }
+    } catch (error) {
+      console.error(`Error processing row ${index}:`, error);
+      // Continue processing other rows even if one fails
+    }
+  });
+
+  return {
+    products: Array.from(productsMap.values()),
+    customers: Array.from(customersMap.values()),
+    invoices
+  };
 };
 
-export const validateData = (data: any) => {
-  // Implement validation logic here
-  return true;
+export const validateData = (data: { products: Product[], customers: Customer[], invoices: Invoice[] }) => {
+  const errors: string[] = [];
+
+  // Validate products
+  data.products.forEach(product => {
+    if (!product.name?.trim()) {
+      errors.push(`Missing product name for product ID: ${product.id}`);
+    }
+    if (product.quantity < 0) {
+      errors.push(`Invalid quantity for product: ${product.name}`);
+    }
+    if (product.unitPrice < 0) {
+      errors.push(`Invalid unit price for product: ${product.name}`);
+    }
+    if (product.tax < 0) {
+      errors.push(`Invalid tax percentage for product: ${product.name}`);
+    }
+  });
+
+  // Validate customers
+  data.customers.forEach(customer => {
+    if (!customer.name?.trim()) {
+      errors.push(`Missing customer name for customer ID: ${customer.id}`);
+    }
+    if (!customer.phoneNumber?.trim()) {
+      errors.push(`Missing phone number for customer: ${customer.name}`);
+    }
+  });
+
+  // Validate invoices
+  data.invoices.forEach(invoice => {
+    if (!invoice.serialNumber?.trim()) {
+      errors.push(`Missing serial number for invoice ID: ${invoice.id}`);
+    }
+    if (!invoice.customerId) {
+      errors.push(`Missing customer reference for invoice: ${invoice.serialNumber}`);
+    }
+    if (!invoice.productId) {
+      errors.push(`Missing product reference for invoice: ${invoice.serialNumber}`);
+    }
+    if (!invoice.quantity || invoice.quantity <= 0) {
+      errors.push(`Invalid quantity for invoice: ${invoice.serialNumber}`);
+    }
+  });
+
+  return errors;
 };

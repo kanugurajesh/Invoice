@@ -51,7 +51,13 @@ const transcribeImage = async (req: Request, res: Response) => {
 };
 
 const transcribeExcel = async (req: Request, res: Response) => {
-  res.json({ message: "Transcribe Excel" });
+  if (!req.file) {
+    res.json({ message: "No file uploaded" });
+    return;
+  }
+
+  
+
 };
 
 export { transcribePdf, transcribeImage, transcribeExcel };
