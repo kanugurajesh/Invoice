@@ -16,8 +16,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
+// Debug middleware
+router.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
+
 // Routes
-router.post('/transcribe/pdf', upload.single('file'), transcribePdf);
-router.post('/transcribe/image', upload.single('file'), transcribeImage);
+router.post('/transcribe/pdf', upload.single('file'), (req, res, next) => {
+  console.log('PDF route hit');
+  transcribePdf(req, res);
+});
+
+router.post('/transcribe/image', upload.single('file'), (req, res, next) => {
+  console.log('Image route hit');
+  transcribeImage(req, res);
+});
+
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ message: 'API is working' });
+});
 
 export default router;

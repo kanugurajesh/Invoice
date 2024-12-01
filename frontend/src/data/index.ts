@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'http://localhost:3000/api';
 
 const urls = {
     transcribePdf: `${BASE_URL}/transcribe/pdf`,

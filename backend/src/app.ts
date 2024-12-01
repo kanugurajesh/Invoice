@@ -1,26 +1,27 @@
-import express, { Request, Response } from "express";
-import router from "./routes";
-import cors from "cors";
-import dotenv from "dotenv";
-
-dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import routes from './routes';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
+
+// Enable CORS
 app.use(cors());
 
-const port = process.env.PORT || 3000;
-
-// Middleware
+// Parse JSON bodies
 app.use(express.json());
 
-// Routes
-app.get("/", (req: Request, res: Response) => {
-  res.send("Hello, TypeScript with Express!");
-});
+// Parse URL-encoded bodies
+app.use(express.urlencoded({ extended: true }));
 
-app.use("/transcribe", router);
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
-// Start Server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+// Use routes with /api prefix
+app.use('/api', routes);
+
+export default app;
