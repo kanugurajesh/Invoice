@@ -19,60 +19,39 @@ const FileUpload: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
 
     setIsLoading(true);
-    try {
-      // Show processing notification
-      const processingToast = toast.info('Processing file...', {
-        autoClose: false,
-        closeButton: false
-      });
+    const processingToast = toast.info(
+      `Processing ${files.length} file${files.length > 1 ? 's' : ''}...`, 
+      { autoClose: false }
+    );
 
-      const data = await processFile(file) as ProcessedData;
+    try {
+      const data = await processFile(files);
 
       // Validate the extracted data
-      if (!Array.isArray(data.products) || !Array.isArray(data.customers) || !Array.isArray(data.invoices)) {
-        throw new Error('Invalid data structure in file');
-      }
-
-      // Validate data using validateData function
       const validationErrors = validateData(data);
       if (validationErrors.length > 0) {
-        // Show validation errors as warnings
         validationErrors.forEach(error => {
-          toast.warning(error, {
-            position: "top-right",
-            autoClose: 5000
-          });
+          toast.warning(error);
         });
       }
 
-      // Update store with extracted data
+      // Update store
       dispatch(setProducts(data.products));
       dispatch(setCustomers(data.customers));
       dispatch(setInvoices(data.invoices));
 
-      // Close processing notification and show success
       toast.dismiss(processingToast);
-      toast.success('File processed successfully!');
-
-      if (validationErrors.length > 0) {
-        toast.info('Some data may be incomplete. Please review and update as needed.', {
-          autoClose: 7000
-        });
-      }
+      toast.success(`Successfully processed ${files.length} file${files.length > 1 ? 's' : ''}!`);
 
     } catch (error) {
-      console.error('File processing error:', error);
-      toast.error(error instanceof Error 
-        ? error.message 
-        : 'Failed to process file. Please try again.'
-      );
+      toast.dismiss(processingToast);
+      toast.error(error instanceof Error ? error.message : 'Failed to process files');
     } finally {
       setIsLoading(false);
-      // Reset input value to allow uploading the same file again
       event.target.value = '';
     }
   };
@@ -87,6 +66,7 @@ const FileUpload: React.FC = () => {
             accept=".xlsx,.xls,.pdf,.png,.jpg,.jpeg"
             onChange={handleFileUpload}
             disabled={isLoading}
+            multiple
           />
           <div className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
             {isLoading ? (

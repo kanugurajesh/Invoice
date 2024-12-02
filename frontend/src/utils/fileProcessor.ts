@@ -1,6 +1,7 @@
 import * as XLSX from "xlsx";
 import { Invoice, Product, Customer } from "../types";
 import urls from "../data";
+import { mergeData } from "./dataMerger";
 
 interface ExcelRow {
   [key: string]: any;
@@ -71,26 +72,52 @@ interface ExcelRow {
 //   );
 // };
 
-export const processFile = async (file: File) => {
-  const fileType = file.type;
-  let data;
+export const processFile = async (files: FileList | File) => {
+  // Handle multiple files
+  if (files instanceof FileList && files.length > 1) {
+    const mergedData = {
+      products: [] as Product[],
+      customers: [] as Customer[],
+      invoices: [] as Invoice[]
+    };
 
-  try {
-    if (fileType.includes("spreadsheet") || fileType.includes("excel")) {
-      data = await processExcel(file);
-    } else if (fileType.includes("pdf")) {
-      data = await processPDF(file);
-    } else if (fileType.includes("image")) {
-      data = await processImage(file);
-    } else {
-      throw new Error("Unsupported file type");
+    // Process each file
+    for (const file of Array.from(files)) {
+      try {
+        let data;
+        if (file.type.includes("spreadsheet") || file.type.includes("excel")) {
+          data = await processExcel(file);
+        } else if (file.type.includes("pdf")) {
+          data = await processPDF(file);
+        } else if (file.type.includes("image")) {
+          data = await processImage(file);
+        } else {
+          console.warn(`Skipping unsupported file type: ${file.type}`);
+          continue;
+        }
+
+        // Merge the data from each file
+        mergeData(mergedData, data);
+      } catch (error) {
+        console.error(`Error processing file ${file.name}:`, error);
+        throw error;
+      }
     }
 
-    return data;
-  } catch (error) {
-    console.error("Error processing file:", error);
-    throw error;
+    return mergedData;
   }
+
+  // Single file processing
+  const file = files instanceof FileList ? files[0] : files;
+  if (file.type.includes("spreadsheet") || file.type.includes("excel")) {
+    return processExcel(file);
+  } else if (file.type.includes("pdf")) {
+    return processPDF(file);
+  } else if (file.type.includes("image")) {
+    return processImage(file);
+  }
+
+  throw new Error("Unsupported file type");
 };
 
 const processExcel = async (
@@ -296,32 +323,28 @@ const processPDF = async (file: File) => {
       }))
     : [{ ...data.CustomersTab, id: "customer-0" }];
 
+  // Helper function to generate unique IDs
+  const generateUniqueId = (prefix: string, index: number) => 
+    `${prefix}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
   // Then create invoices with proper relationships
   const invoices = Array.isArray(data.InvoicesTab)
     ? data.InvoicesTab.map((invoice: any, index: number) => {
-        // Find corresponding product and customer
-        const product = products.find(
-          (p: { name: string }) => p.name === invoice.productName
-        );
-        const customer = customers.find(
-          (c: { name: string }) => c.name === invoice.customerName
-        );
-
+        const matchedProduct = products.find((p: Product) => p.name === invoice.productName);
+        const matchedCustomer = customers.find((c: Customer) => c.name === invoice.customerName);
         return {
           ...invoice,
-          id: invoice.id || `invoice-${index}`,
-          productId: product?.id || `product-unknown`,
-          customerId: customer?.id || `customer-unknown`,
+          id: invoice.id || generateUniqueId('invoice', index),
+          productId: matchedProduct?.id || generateUniqueId('product-unknown', index),
+          customerId: matchedCustomer?.id || generateUniqueId('customer-unknown', index)
         };
       })
-    : [
-        {
-          ...data.InvoicesTab,
-          id: "invoice-0",
-          productId: "product-0",
-          customerId: "customer-0",
-        },
-      ];
+    : [{
+        ...data.InvoicesTab,
+        id: generateUniqueId('invoice', 0),
+        productId: generateUniqueId('product', 0),
+        customerId: generateUniqueId('customer', 0)
+      }];
 
   return { products, customers, invoices };
 };
@@ -390,50 +413,23 @@ const processImage = async (file: File) => {
           }]
         : [];
 
+    // Helper function to generate unique IDs
+    const generateUniqueId = (prefix: string, index: number) => 
+      `${prefix}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     // Then create invoices with proper relationships
     const invoices = Array.isArray(data.InvoicesTab)
       ? data.InvoicesTab.map((invoice: any, index: number) => {
-          // Find corresponding product and customer
-          const product = products.find(
-            (p: { name: string }) => 
-              p.name === invoice.productName || 
-              p.name === invoice.name
-          );
-          const customer = customers.find(
-            (c: { name: string }) => 
-              c.name === invoice.customerName || 
-              c.name === invoice.name
-          );
-
+          const matchedProduct = products.find((p: Product) => p.name === invoice.productName);
+          const matchedCustomer = customers.find((c: Customer) => c.name === invoice.customerName);
           return {
             ...invoice,
-            id: invoice.id || `invoice-${index}`,
-            serialNumber: invoice.serialNumber || `INV-${index + 1}`,
-            productId: product?.id || `product-unknown`,
-            customerId: customer?.id || `customer-unknown`,
-            customerName: customer?.name || invoice.customerName || 'Unknown Customer',
-            productName: product?.name || invoice.productName || 'Unknown Product',
-            quantity: Number(invoice.quantity) || 1,
-            tax: Number(invoice.tax) || 0,
-            totalAmount: Number(invoice.totalAmount) || 0,
-            date: invoice.date ? new Date(invoice.date).toISOString() : new Date().toISOString()
+            id: invoice.id || generateUniqueId('invoice', index),
+            productId: matchedProduct?.id || generateUniqueId('product-unknown', index),
+            customerId: matchedCustomer?.id || generateUniqueId('customer-unknown', index)
           };
         })
-      : data.InvoicesTab
-        ? [{
-            ...data.InvoicesTab,
-            id: "invoice-0",
-            serialNumber: data.InvoicesTab.serialNumber || 'INV-1',
-            productId: "product-0",
-            customerId: "customer-0",
-            quantity: Number(data.InvoicesTab.quantity) || 1,
-            tax: Number(data.InvoicesTab.tax) || 0,
-            totalAmount: Number(data.InvoicesTab.totalAmount) || 0,
-            date: data.InvoicesTab.date 
-              ? new Date(data.InvoicesTab.date).toISOString() 
-              : new Date().toISOString()
-          }]
-        : [];
+      : [];
 
     console.log('Processed Image Data:', { products, customers, invoices });
 
