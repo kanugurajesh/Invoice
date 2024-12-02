@@ -46,10 +46,12 @@ All test cases have been successfully implemented and thoroughly tested:
 ## 🛠️ Technology Stack
 
 - **Frontend**: React.js, Redux
-- **UI Framework**: [Your UI Framework]
+- **UI Framework**: Material UI
 - **AI Integration**: Google Gemini API
 - **State Management**: Redux
-- **Styling**: [Your Styling Solution]
+- **Styling**: Tailwind Css
+- **Backend**: Express.js, Node.js
+- **Language**: Typescript
 
 ## 📦 Installation
 
