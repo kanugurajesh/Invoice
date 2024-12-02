@@ -1,7 +1,7 @@
 # Backend Documentation - Invoice Management System
 
 ## Overview
-This is the backend service for the Automated Data Extraction and Invoice Management System. It provides APIs for processing various file formats (Excel, PDF, Images) and manages data for invoices, products, and customers using AI-powered extraction.
+This is the backend service for the Automated Data Extraction and Invoice Management System. The service processes various file formats (Excel, PDF, Images) and extracts invoice, product, and customer data using Google Gemini AI.
 
 ## Tech Stack
 - Node.js
@@ -10,28 +10,26 @@ This is the backend service for the Automated Data Extraction and Invoice Manage
 - Multer (File handling)
 
 
-## AI Data Extraction
+## File Processing & AI Data Extraction
 
-The system uses Google Gemini AI for extracting data from various file formats:
+The system processes three types of files:
 
-1. **PDF Processing**
+1. **PDF Files**
    - Extracts text and tabular data
    - Identifies invoice details, product information, and customer data
-   - Handles multiple page documents
 
-2. **Image Processing**
-   - OCR capabilities for text extraction
-   - Structure recognition for invoice layouts
-   - Support for various image formats (PNG, JPEG, etc.)
+2. **Image Files**
+   - Uses Google Gemini AI's vision capabilities
+   - Extracts text from invoice images
+   - Processes structured data from images
 
-3. **Excel Processing**
+3. **Excel Files**
    - Processes structured data
    - Maps columns to appropriate data models
    - Handles multiple sheets
 
 ## Error Handling
-
-The system implements comprehensive error handling for:
+The system implements error handling for:
 - Invalid file formats
 - Missing required fields
 - Data validation failures
