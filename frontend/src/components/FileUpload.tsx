@@ -7,6 +7,7 @@ import { setProducts } from '../store/slices/productsSlice';
 import { setCustomers } from '../store/slices/customersSlice';
 import { setInvoices } from '../store/slices/invoicesSlice';
 import { Product, Customer, Invoice } from '../types';
+import { mergeDataSets } from '../utils/dataMerger';
 
 interface ProcessedData {
   products: Product[];
@@ -29,20 +30,29 @@ const FileUpload: React.FC = () => {
     );
 
     try {
-      const data = await processFile(files);
+      // Process each file and collect results
+      const processedDataSets: ProcessedData[] = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const fileData = await processFile(files[i]);
+        processedDataSets.push(fileData);
+      }
 
-      // Validate the extracted data
-      const validationErrors = validateData(data);
+      // Merge data from all files
+      const mergedData = mergeDataSets(processedDataSets);
+
+      // Validate the merged data
+      const validationErrors = validateData(mergedData);
       if (validationErrors.length > 0) {
         validationErrors.forEach(error => {
           toast.warning(error);
         });
       }
 
-      // Update store
-      dispatch(setProducts(data.products));
-      dispatch(setCustomers(data.customers));
-      dispatch(setInvoices(data.invoices));
+      // Update store with merged data
+      dispatch(setProducts(mergedData.products));
+      dispatch(setCustomers(mergedData.customers));
+      dispatch(setInvoices(mergedData.invoices));
 
       toast.dismiss(processingToast);
       toast.success(`Successfully processed ${files.length} file${files.length > 1 ? 's' : ''}!`);
