@@ -24,6 +24,11 @@ const findNumericValue = (row: ExcelRow, possibleNames: string[]): number => {
   return 0;
 };
 
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 export const processFile = async (files: FileList | File) => {
   // Convert FileList to array or wrap single File in array
   const fileArray = files instanceof FileList ? Array.from(files) : [files];
@@ -357,47 +362,78 @@ export const validateData = (data: {
 
   // Validate products
   data.products.forEach((product) => {
-    if (!product.name?.trim()) {
-      errors.push(`Missing product name for product ID: ${product.id}`);
+    const missingFields = [];
+    if (!product.name?.trim()) missingFields.push('name');
+    if (product.quantity === undefined) missingFields.push('quantity');
+    if (product.unitPrice === undefined) missingFields.push('unit price');
+    if (product.tax === undefined) missingFields.push('tax');
+    if (product.priceWithTax === undefined) missingFields.push('price with tax');
+
+    if (missingFields.length > 0) {
+      errors.push(`Missing fields for product ${product.id}: ${missingFields.join(', ')}`);
     }
+
+    // Validate existing fields
     if (product.quantity < 0) {
-      errors.push(`Invalid quantity for product: ${product.name}`);
+      errors.push(`Invalid quantity for product: ${product.name || product.id}`);
     }
     if (product.unitPrice < 0) {
-      errors.push(`Invalid unit price for product: ${product.name}`);
+      errors.push(`Invalid unit price for product: ${product.name || product.id}`);
     }
     if (product.tax < 0) {
-      errors.push(`Invalid tax percentage for product: ${product.name}`);
+      errors.push(`Invalid tax percentage for product: ${product.name || product.id}`);
     }
   });
 
   // Validate customers
   data.customers.forEach((customer) => {
-    if (!customer.name?.trim()) {
-      errors.push(`Missing customer name for customer ID: ${customer.id}`);
+    const missingFields = [];
+    if (!customer.name?.trim()) missingFields.push('name');
+    if (!customer.phoneNumber?.trim()) missingFields.push('phone number');
+    if (!customer.email?.trim()) missingFields.push('email');
+    if (!customer.address?.trim()) missingFields.push('address');
+    if (customer.totalPurchaseAmount === undefined) missingFields.push('total purchase amount');
+
+    if (missingFields.length > 0) {
+      errors.push(`Missing fields for customer ${customer.id}: ${missingFields.join(', ')}`);
     }
-    if (!customer.phoneNumber?.trim()) {
-      errors.push(`Missing phone number for customer: ${customer.name}`);
+
+    // Validate existing fields
+    if (customer.totalPurchaseAmount < 0) {
+      errors.push(`Invalid total purchase amount for customer: ${customer.name || customer.id}`);
+    }
+    // Validate email format if present
+    if (customer.email && !isValidEmail(customer.email)) {
+      errors.push(`Invalid email format for customer: ${customer.name || customer.id}`);
     }
   });
 
   // Validate invoices
   data.invoices.forEach((invoice) => {
-    if (!invoice.serialNumber?.trim()) {
-      errors.push(`Missing serial number for invoice ID: ${invoice.id}`);
+    const missingFields = [];
+    if (!invoice.serialNumber?.trim()) missingFields.push('serial number');
+    if (!invoice.customerId) missingFields.push('customer ID');
+    if (!invoice.customerName?.trim()) missingFields.push('customer name');
+    if (!invoice.productId) missingFields.push('product ID');
+    if (!invoice.productName?.trim()) missingFields.push('product name');
+    if (invoice.quantity === undefined) missingFields.push('quantity');
+    if (invoice.tax === undefined) missingFields.push('tax');
+    if (invoice.totalAmount === undefined) missingFields.push('total amount');
+    if (!invoice.date) missingFields.push('date');
+
+    if (missingFields.length > 0) {
+      errors.push(`Missing fields for invoice ${invoice.id}: ${missingFields.join(', ')}`);
     }
-    if (!invoice.customerId) {
-      errors.push(
-        `Missing customer reference for invoice: ${invoice.serialNumber}`
-      );
+
+    // Validate existing fields
+    if (invoice.quantity <= 0) {
+      errors.push(`Invalid quantity for invoice: ${invoice.serialNumber || invoice.id}`);
     }
-    if (!invoice.productId) {
-      errors.push(
-        `Missing product reference for invoice: ${invoice.serialNumber}`
-      );
+    if (invoice.tax < 0) {
+      errors.push(`Invalid tax for invoice: ${invoice.serialNumber || invoice.id}`);
     }
-    if (!invoice.quantity || invoice.quantity <= 0) {
-      errors.push(`Invalid quantity for invoice: ${invoice.serialNumber}`);
+    if (invoice.totalAmount < 0) {
+      errors.push(`Invalid total amount for invoice: ${invoice.serialNumber || invoice.id}`);
     }
   });
 
