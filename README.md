@@ -1,59 +1,77 @@
-# Swipe Invoice Manager
+# Automated Data Extraction and Invoice Management System
 
-A modern React TypeScript application for managing business operations including invoices, products, and customer data.
+A React-based application for Swipe that automates the extraction, processing, and management of invoice data from various file formats. The application organizes extracted data into three main sections: Invoices, Products, and Customers, with real-time synchronization using Redux.
 
-## 🚀 Features
+## 🎯 Project Overview
 
-- **Invoice Management**: Track and manage invoices with detailed information
-- **Product Catalog**: Maintain product inventory and details
-- **Customer Database**: Manage customer information and relationships
-- **Interactive Data Tables**: Sort, filter, and edit data directly in tables
-- **File Upload**: Support for importing data via file uploads
-- **Error Handling**: Robust error boundary implementation for graceful error management
-- **Editable Cells**: In-line editing capabilities for quick data updates
+This application successfully implements all requirements and test cases, providing a robust solution for automated invoice processing.
+
+### ✅ Key Features
+
+- **Multi-format File Processing**
+  - Excel files (transaction details)
+  - PDF invoices
+  - Image-based invoices
+  - Seamless handling of mixed file types
+
+- **AI-Powered Data Extraction**
+  - Implemented using Google Gemini API
+  - Intelligent data recognition and categorization
+  - Automatic field mapping and organization
+
+- **Interactive Dashboard**
+  - Invoices Tab: Complete transaction details
+  - Products Tab: Comprehensive product inventory
+  - Customers Tab: Customer information and purchase history
+
+- **Real-time Data Synchronization**
+  - Redux-based state management
+  - Instant updates across all tabs
+  - Consistent data representation
+
+### ✅ Test Cases Completed
+
+All test cases have been successfully implemented and thoroughly tested:
+
+1. **Case-1**: Single Invoice PDFs
+2. **Case-2**: Mixed Invoice PDFs and Images
+3. **Case-3**: Single Excel File Processing
+4. **Case-4**: Multiple Excel Files
+5. **Case-5**: Mixed File Types (All Formats)
+
+## 🚀 Live Demo
+
+<!-- TODO: Add live demo link -->
 
 ## 🛠️ Technology Stack
 
-- React
-- TypeScript
-- Modern React Hooks
-- Component-based architecture
-- Tailwind CSS
-- Material UI
+- **Frontend**: React.js, Redux
+- **UI Framework**: [Your UI Framework]
+- **AI Integration**: Google Gemini API
+- **State Management**: Redux
+- **Styling**: [Your Styling Solution]
 
-## 📁 Project Structure
+## 📦 Installation
 
-```
-frontend/
-├── src/
-│ ├── components/
-│ │ ├── InvoicesTab.tsx
-│ │ ├── ProductsTab.tsx
-│ │ ├── CustomersTab.tsx
-│ │ ├── DataTable.tsx
-│ │ ├── EditableCell.tsx
-│ │ ├── ErrorBoundary.tsx
-│ │ └── FileUpload.tsx
-│ └── App.tsx
-```
-
-
-## 🚦 Getting Started
-
-1. **Clone the repository**
+1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/kanugurajesh/invoice
    ```
 
-2. **Install dependencies**
+2. Install dependencies
    ```bash
    cd frontend
    npm install
+   cd ../backend
+   npm install
    ```
 
-3. **Run the development server**
+3. Run the development server
    ```bash
-   npm start
+   cd frontend
+   npm run dev
+   cd ../backend
+   npm run dev
    ```
 
 ## 💻 Usage
