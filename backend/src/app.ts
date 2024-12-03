@@ -8,7 +8,7 @@ const app = express();
 
 // Enable CORS for all origins
 app.use(cors({
-    origin: '*',
+    origin: 'https://invoice-kc4j.vercel.app/',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
