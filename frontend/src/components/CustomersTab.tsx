@@ -10,7 +10,7 @@ import { Customer } from '../types';
 // Component for displaying and managing customer data
 const CustomersTab: React.FC = () => {
   const dispatch = useDispatch();
-  
+
   // Get flattened customer data from Redux store
   const customers = useSelector((state: RootState) => {
     const items = state.customers.items;
@@ -21,7 +21,7 @@ const CustomersTab: React.FC = () => {
 
   // Handle updates to customer data
   const handleUpdate = (customerId: string, field: string, value: any) => {
-    const customer = customers.find(c => c.id === customerId);
+    const customer = customers.find((c) => c.id === customerId);
     if (!customer) return;
 
     // Update customer in store
@@ -29,12 +29,12 @@ const CustomersTab: React.FC = () => {
     dispatch(updateCustomer(updatedCustomer));
 
     // Update related invoices if customer name changes
-    if (field === 'name') {
-      dispatch(updateInvoicesByCustomer({
+    dispatch(
+      updateInvoicesByCustomer({
         customerId,
-        updates: { customerName: value }
-      }));
-    }    
+        updates: { customerName: value },
+      })
+    );
   };
 
   // Column definitions for customer table
@@ -47,7 +47,7 @@ const CustomersTab: React.FC = () => {
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'name', newValue)}
         />
-      )
+      ),
     },
     {
       key: 'phoneNumber',
@@ -57,7 +57,7 @@ const CustomersTab: React.FC = () => {
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'phoneNumber', newValue)}
         />
-      )
+      ),
     },
     {
       key: 'totalPurchaseAmount',
@@ -65,10 +65,12 @@ const CustomersTab: React.FC = () => {
       render: (value: number, row: Customer) => (
         <EditableCell
           value={value ?? 0}
-          onSave={(newValue) => handleUpdate(row.id, 'totalPurchaseAmount', Number(newValue))}
+          onSave={(newValue) =>
+            handleUpdate(row.id, 'totalPurchaseAmount', Number(newValue))
+          }
           type="number"
         />
-      )
+      ),
     },
     {
       key: 'email',
@@ -78,7 +80,7 @@ const CustomersTab: React.FC = () => {
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'email', newValue)}
         />
-      )
+      ),
     },
     {
       key: 'address',
@@ -88,7 +90,7 @@ const CustomersTab: React.FC = () => {
           value={value || '-'}
           onSave={(newValue) => handleUpdate(row.id, 'address', newValue)}
         />
-      )
+      ),
     },
   ];
 

@@ -30,4 +30,4 @@ export const selectFlattenedCustomers = createSelector(
     const flattened = items.flat();
     return flattened.length > 0 ? flattened : [];
   }
-); 
+);

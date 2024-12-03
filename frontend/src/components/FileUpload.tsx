@@ -20,20 +20,22 @@ const FileUpload: React.FC = () => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
     setIsLoading(true);
     const processingToast = toast.info(
-      `Processing ${files.length} file${files.length > 1 ? 's' : ''}...`, 
+      `Processing ${files.length} file${files.length > 1 ? 's' : ''}...`,
       { autoClose: false }
     );
 
     try {
       // Process each file and collect results
       const processedDataSets: ProcessedData[] = [];
-      
+
       for (let i = 0; i < files.length; i++) {
         const fileData = await processFile(files[i]);
         processedDataSets.push(fileData);
@@ -45,7 +47,7 @@ const FileUpload: React.FC = () => {
       // Validate the merged data
       const validationErrors = validateData(mergedData);
       if (validationErrors.length > 0) {
-        validationErrors.forEach(error => {
+        validationErrors.forEach((error) => {
           toast.warning(error);
         });
       }
@@ -56,11 +58,14 @@ const FileUpload: React.FC = () => {
       dispatch(setInvoices(mergedData.invoices));
 
       toast.dismiss(processingToast);
-      toast.success(`Successfully processed ${files.length} file${files.length > 1 ? 's' : ''}!`);
-
+      toast.success(
+        `Successfully processed ${files.length} file${files.length > 1 ? 's' : ''}!`
+      );
     } catch (error) {
       toast.dismiss(processingToast);
-      toast.error(error instanceof Error ? error.message : 'Failed to process files');
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to process files'
+      );
     } finally {
       setIsLoading(false);
       event.target.value = '';
@@ -97,7 +102,8 @@ const FileUpload: React.FC = () => {
         )}
       </div>
       <div className="mt-2 text-sm text-gray-500">
-        Supported formats: Excel (.xlsx, .xls), PDF (.pdf), Images (.png, .jpg, .jpeg)
+        Supported formats: Excel (.xlsx, .xls), PDF (.pdf), Images (.png, .jpg,
+        .jpeg)
       </div>
     </div>
   );

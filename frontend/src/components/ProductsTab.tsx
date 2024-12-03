@@ -1,10 +1,10 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../store";
-import { updateProduct } from "../store/slices/productsSlice";
-import { updateInvoicesByProduct } from "../store/slices/invoicesSlice";
-import DataTable from "./DataTable";
-import EditableCell from "./EditableCell";
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../store';
+import { updateProduct } from '../store/slices/productsSlice';
+import { updateInvoicesByProduct } from '../store/slices/invoicesSlice';
+import DataTable from './DataTable';
+import EditableCell from './EditableCell';
 import { Product } from '../types';
 
 // Component for displaying and managing product data
@@ -41,78 +41,84 @@ const ProductsTab: React.FC = () => {
     dispatch(updateProduct(updatedProduct));
 
     // Update related invoices
-    if (field === "name") {
-      dispatch(
-        updateInvoicesByProduct({
-          productId,
-          updates: { productName: value },
-        })
-      );
-    }
+    dispatch(
+      updateInvoicesByProduct({
+        productId,
+        updates: { productName: value },
+      })
+    );
   };
 
   const columns = [
     {
-      key: "name",
-      header: "Name",
+      key: 'name',
+      header: 'Name',
       render: (value: string, row: Product) => (
         <EditableCell
           value={value}
-          onSave={(newValue) => handleUpdate(row.id, "name", newValue)}
+          onSave={(newValue) => handleUpdate(row.id, 'name', newValue)}
         />
       ),
     },
     {
-      key: "quantity",
-      header: "Quantity",
+      key: 'quantity',
+      header: 'Quantity',
       render: (value: number, row: Product) => (
         <EditableCell
           value={value ?? 0}
-          onSave={(newValue) => handleUpdate(row.id, "quantity", Number(newValue))}
+          onSave={(newValue) =>
+            handleUpdate(row.id, 'quantity', Number(newValue))
+          }
           type="number"
         />
       ),
     },
     {
-      key: "unitPrice",
-      header: "Unit Price",
+      key: 'unitPrice',
+      header: 'Unit Price',
       render: (value: number, row: Product) => (
         <EditableCell
           value={value ?? 0}
-          onSave={(newValue) => handleUpdate(row.id, "unitPrice", Number(newValue))}
+          onSave={(newValue) =>
+            handleUpdate(row.id, 'unitPrice', Number(newValue))
+          }
           type="number"
         />
       ),
     },
     {
-      key: "tax",
-      header: "Tax",
+      key: 'tax',
+      header: 'Tax',
       render: (value: number, row: Product) => (
         <EditableCell
           value={value ?? 0}
-          onSave={(newValue) => handleUpdate(row.id, "tax", Number(newValue))}
+          onSave={(newValue) => handleUpdate(row.id, 'tax', Number(newValue))}
           type="number"
         />
       ),
     },
     {
-      key: "priceWithTax",
-      header: "Price with Tax",
+      key: 'priceWithTax',
+      header: 'Price with Tax',
       render: (value: number, row: Product) => (
         <EditableCell
           value={value ?? 0}
-          onSave={(newValue) => handleUpdate(row.id, "priceWithTax", Number(newValue))}
+          onSave={(newValue) =>
+            handleUpdate(row.id, 'priceWithTax', Number(newValue))
+          }
           type="number"
         />
       ),
     },
     {
-      key: "discount",
-      header: "Discount",
+      key: 'discount',
+      header: 'Discount',
       render: (value: number, row: Product) => (
         <EditableCell
           value={value ?? 0}
-          onSave={(newValue) => handleUpdate(row.id, "discount", Number(newValue))}
+          onSave={(newValue) =>
+            handleUpdate(row.id, 'discount', Number(newValue))
+          }
           type="number"
         />
       ),
@@ -125,7 +131,6 @@ const ProductsTab: React.FC = () => {
       <DataTable data={products} columns={columns} />
     </div>
   );
-  
 };
 
 export default ProductsTab;

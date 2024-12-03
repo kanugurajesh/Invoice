@@ -26,12 +26,16 @@ const customersSlice = createSlice({
     },
     updateCustomer: (state, action: PayloadAction<Customer>) => {
       console.log('Updating customer:', action.payload);
-      const index = state.items.findIndex(item => item.id === action.payload.id);
+      const index = state.items.findIndex(
+        (item) => item.id === action.payload.id
+      );
       console.log('Found customer at index:', index);
       if (index !== -1) {
         const updatedCustomer = {
           ...action.payload,
-          totalPurchaseAmount: action.payload.totalPurchaseAmount ?? state.items[index].totalPurchaseAmount
+          totalPurchaseAmount:
+            action.payload.totalPurchaseAmount ??
+            state.items[index].totalPurchaseAmount,
         };
         console.log('Updated customer:', updatedCustomer);
         state.items[index] = updatedCustomer;
@@ -46,5 +50,11 @@ const customersSlice = createSlice({
   },
 });
 
-export const { setCustomers, addCustomer, updateCustomer, setLoading, setError } = customersSlice.actions;
+export const {
+  setCustomers,
+  addCustomer,
+  updateCustomer,
+  setLoading,
+  setError,
+} = customersSlice.actions;
 export default customersSlice.reducer;

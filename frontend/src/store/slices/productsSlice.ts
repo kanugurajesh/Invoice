@@ -21,9 +21,12 @@ const initialState: ProductsState = {
 const validateProduct = (product: Product): string[] => {
   const errors: string[] = [];
   if (!product.name?.trim()) errors.push('Product name is required');
-  if (product.quantity === undefined || product.quantity < 0) errors.push('Valid quantity is required');
-  if (product.unitPrice === undefined || product.unitPrice < 0) errors.push('Valid unit price is required');
-  if (product.tax === undefined || product.tax < 0) errors.push('Valid tax percentage is required');
+  if (product.quantity === undefined || product.quantity < 0)
+    errors.push('Valid quantity is required');
+  if (product.unitPrice === undefined || product.unitPrice < 0)
+    errors.push('Valid unit price is required');
+  if (product.tax === undefined || product.tax < 0)
+    errors.push('Valid tax percentage is required');
   return errors;
 };
 
@@ -37,8 +40,8 @@ const productsSlice = createSlice({
       state.items = action.payload;
       state.validationErrors = {};
       state.incompleteProducts = [];
-      
-      action.payload.forEach(product => {
+
+      action.payload.forEach((product) => {
         const errors = validateProduct(product);
         if (errors.length > 0) {
           state.validationErrors[product.id] = errors;
@@ -54,13 +57,18 @@ const productsSlice = createSlice({
         state.incompleteProducts.push(action.payload.id);
       } else {
         delete state.validationErrors[action.payload.id];
-        state.incompleteProducts = state.incompleteProducts.filter(id => id !== action.payload.id);
+        state.incompleteProducts = state.incompleteProducts.filter(
+          (id) => id !== action.payload.id
+        );
       }
       state.items.push(action.payload);
     },
     // Action to update a product
     updateProduct: (state, action: PayloadAction<Product>) => {
-      const index = state.items.findIndex(item => item.id === action.payload.id);
+      const index = state.items.findIndex(
+        (item) => item.id === action.payload.id
+      );
+
       if (index !== -1) {
         const errors = validateProduct(action.payload);
         if (errors.length > 0) {
@@ -70,17 +78,32 @@ const productsSlice = createSlice({
           }
         } else {
           delete state.validationErrors[action.payload.id];
-          state.incompleteProducts = state.incompleteProducts.filter(id => id !== action.payload.id);
+          state.incompleteProducts = state.incompleteProducts.filter(
+            (id) => id !== action.payload.id
+          );
         }
 
         const updatedProduct = {
           ...action.payload,
-          priceWithTax: action.payload.tax !== undefined && action.payload.unitPrice !== undefined
-            ? action.payload.unitPrice * (1 + action.payload.tax/100)
-            : state.items[index].priceWithTax
+          priceWithTax:
+            action.payload.tax !== undefined &&
+            action.payload.unitPrice !== undefined
+              ? action.payload.unitPrice * (1 + action.payload.tax / 100)
+              : state.items[index].priceWithTax,
         };
         state.items[index] = updatedProduct;
       }
+    },
+    updateProductsByInvoice: (
+      state,
+      action: PayloadAction<{ productId: string; updates: Partial<Product> }>
+    ) => {
+      state.items = state.items.map((product) => {
+        if (product.id === action.payload.productId) {
+          return { ...product, ...action.payload.updates };
+        }
+        return product;
+      });
     },
     // Action to set the loading state
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -91,18 +114,21 @@ const productsSlice = createSlice({
     },
     clearValidationErrors: (state, action: PayloadAction<string>) => {
       delete state.validationErrors[action.payload];
-      state.incompleteProducts = state.incompleteProducts.filter(id => id !== action.payload);
+      state.incompleteProducts = state.incompleteProducts.filter(
+        (id) => id !== action.payload
+      );
     },
   },
 });
 
-export const { 
-  setProducts, 
-  addProduct, 
-  updateProduct, 
-  setLoading, 
+export const {
+  setProducts,
+  addProduct,
+  updateProduct,
+  setLoading,
   setError,
-  clearValidationErrors 
+  clearValidationErrors,
+  updateProductsByInvoice,
 } = productsSlice.actions;
 
 export default productsSlice.reducer;

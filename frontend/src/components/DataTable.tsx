@@ -31,18 +31,24 @@ const DataTable: React.FC<DataTableProps> = ({ data, columns }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {Array.isArray(data) && data.map((row) => (
-            <tr key={row.id || Math.random().toString()} className="hover:bg-gray-50">
-              {columns.map((column) => (
-                <td key={`${row.id}-${column.key}`} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {column.render 
-                    ? column.render(row[column.key], row)
-                    : row[column.key]
-                  }
-                </td>
-              ))}
-            </tr>
-          ))}
+          {Array.isArray(data) &&
+            data.map((row) => (
+              <tr
+                key={row.id || Math.random().toString()}
+                className="hover:bg-gray-50"
+              >
+                {columns.map((column) => (
+                  <td
+                    key={`${row.id}-${column.key}`}
+                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                  >
+                    {column.render
+                      ? column.render(row[column.key], row)
+                      : row[column.key]}
+                  </td>
+                ))}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -26,9 +27,9 @@
     "@types/node": "^22.10.1",
     "@types/pdf-parse": "^1.1.4",
     "nodemon": "^3.1.7",
+    "prettier": "^3.4.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
   }
 }
-

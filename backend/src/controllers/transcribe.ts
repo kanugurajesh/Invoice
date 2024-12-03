@@ -1,9 +1,9 @@
-import { Request, Response } from "express";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import fs from "fs";
-import pdf from "pdf-parse";
-import { extractDataPrompt } from "../helpers/data";
-import dotenv from "dotenv";
+import { Request, Response } from 'express';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import fs from 'fs';
+import pdf from 'pdf-parse';
+import { extractDataPrompt } from '../helpers/data';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -15,11 +15,11 @@ if (!process.env.GEMINI_API_KEY) {
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Get the Gemini 1.5 Flash model
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 const transcribePdf = async (req: Request, res: Response): Promise<void> => {
   if (!req.file) {
-    res.json({ message: "No file uploaded" });
+    res.json({ message: 'No file uploaded' });
     return;
   }
 
@@ -57,19 +57,20 @@ const transcribePdf = async (req: Request, res: Response): Promise<void> => {
   res.json(jsonString);
 
   return;
-  
 };
 
 // Initializing the Vision model
-const visionModel = genAI.getGenerativeModel({ model: 'models/gemini-1.5-pro' });
+const visionModel = genAI.getGenerativeModel({
+  model: 'models/gemini-1.5-pro',
+});
 
 // Function to extract data from an image
 const transcribeImage = async (req: Request, res: Response): Promise<void> => {
   let filePath: string | null = null;
-  
+
   try {
     if (!req.file) {
-      res.status(400).json({ message: "No file uploaded" });
+      res.status(400).json({ message: 'No file uploaded' });
       return;
     }
 
@@ -84,7 +85,9 @@ const transcribeImage = async (req: Request, res: Response): Promise<void> => {
     // Validate file type
     const validMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validMimeTypes.includes(req.file.mimetype)) {
-      throw new Error('Invalid file type. Supported types are JPEG, PNG, and WebP');
+      throw new Error(
+        'Invalid file type. Supported types are JPEG, PNG, and WebP'
+      );
     }
 
     // Read and convert image
@@ -94,25 +97,25 @@ const transcribeImage = async (req: Request, res: Response): Promise<void> => {
     console.log('Processing image:', {
       fileName: req.file.originalname,
       mimeType: req.file.mimetype,
-      size: stats.size
+      size: stats.size,
     });
 
     // Prepare request
     const imagePart = {
       inlineData: {
         data: imageBase64,
-        mimeType: req.file.mimetype
-      }
+        mimeType: req.file.mimetype,
+      },
     };
 
     // Make API request with timeout
-    const timeoutPromise = new Promise((_, reject) => 
+    const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Request timeout')), 30000)
     );
 
     const apiPromise = visionModel.generateContent([
       { text: extractDataPrompt },
-      imagePart
+      imagePart,
     ]);
 
     const result = await Promise.race([apiPromise, timeoutPromise]);
@@ -144,11 +147,13 @@ const transcribeImage = async (req: Request, res: Response): Promise<void> => {
       console.error('Failed to parse API response:', parseError);
       res.status(422).json({
         message: 'Failed to parse API response',
-        error: parseError instanceof Error ? parseError.message : 'Unknown parsing error',
-        rawResponse: text
+        error:
+          parseError instanceof Error
+            ? parseError.message
+            : 'Unknown parsing error',
+        rawResponse: text,
       });
     }
-
   } catch (error) {
     console.error('Image processing error:', error);
 
@@ -162,23 +167,23 @@ const transcribeImage = async (req: Request, res: Response): Promise<void> => {
       if (error.message.includes('fetch failed')) {
         res.status(503).json({
           message: 'Failed to connect to AI service',
-          error: 'Network error - please try again'
+          error: 'Network error - please try again',
         });
       } else if (error.message.includes('timeout')) {
         res.status(504).json({
           message: 'Request timed out',
-          error: 'The request took too long to process'
+          error: 'The request took too long to process',
         });
       } else {
         res.status(500).json({
           message: 'Failed to process image',
-          error: error.message
+          error: error.message,
         });
       }
     } else {
       res.status(500).json({
         message: 'Failed to process image',
-        error: 'Unknown error occurred'
+        error: 'Unknown error occurred',
       });
     }
   }

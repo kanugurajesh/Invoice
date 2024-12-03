@@ -8,7 +8,7 @@ interface ProcessedData {
 
 export const mergeDataSets = (dataSets: ProcessedData[]): ProcessedData => {
   console.log('Merging datasets:', dataSets.length);
-  
+
   if (dataSets.length === 0) {
     return { products: [], customers: [], invoices: [] };
   }
@@ -27,21 +27,21 @@ export const mergeDataSets = (dataSets: ProcessedData[]): ProcessedData => {
     console.log(`Processing dataset ${index}:`, {
       productsCount: dataset.products.length,
       customersCount: dataset.customers.length,
-      invoicesCount: dataset.invoices.length
+      invoicesCount: dataset.invoices.length,
     });
 
-    dataset.products.forEach(product => {
+    dataset.products.forEach((product) => {
       // Use both ID and name as key to prevent duplicates
       const key = `${product.name}-${product.id}`;
       productsMap.set(key, product);
     });
 
-    dataset.customers.forEach(customer => {
+    dataset.customers.forEach((customer) => {
       const key = `${customer.name}-${customer.id}`;
       customersMap.set(key, customer);
     });
 
-    dataset.invoices.forEach(invoice => {
+    dataset.invoices.forEach((invoice) => {
       // Use serial number as part of the key to prevent duplicates
       const key = `${invoice.serialNumber}-${invoice.id}`;
       invoicesMap.set(key, invoice);
@@ -57,8 +57,8 @@ export const mergeDataSets = (dataSets: ProcessedData[]): ProcessedData => {
   console.log('Merge result:', {
     productsCount: result.products.length,
     customersCount: result.customers.length,
-    invoicesCount: result.invoices.length
+    invoicesCount: result.invoices.length,
   });
 
   return result;
-}; 
+};

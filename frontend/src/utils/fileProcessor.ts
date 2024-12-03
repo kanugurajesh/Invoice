@@ -1,8 +1,7 @@
-import * as XLSX from "xlsx";
-import { Invoice, Product, Customer } from "../types";
-import urls from "../data";
-// import { mergeData } from "./dataMerger";
-import { mergeDataSets } from "./dataMerger";
+import * as XLSX from 'xlsx';
+import { Invoice, Product, Customer } from '../types';
+import urls from '../data';
+import { mergeDataSets } from './dataMerger';
 
 interface ExcelRow {
   [key: string]: any;
@@ -13,7 +12,7 @@ const findValue = (row: ExcelRow, possibleNames: string[]): string => {
   for (const name of possibleNames) {
     if (row[name] !== undefined) return String(row[name]);
   }
-  return "";
+  return '';
 };
 
 // Helper function to find numeric value
@@ -41,17 +40,17 @@ export const processFile = async (files: FileList | File) => {
     try {
       let data;
       console.log('Processing file:', file.name);
-      
-      if (file.type.includes("spreadsheet") || file.type.includes("excel")) {
+
+      if (file.type.includes('spreadsheet') || file.type.includes('excel')) {
         data = await processExcel(file);
         console.log('Excel data processed:', {
           productsCount: data.products.length,
           customersCount: data.customers.length,
-          invoicesCount: data.invoices.length
+          invoicesCount: data.invoices.length,
         });
-      } else if (file.type.includes("pdf")) {
+      } else if (file.type.includes('pdf')) {
         data = await processPDF(file);
-      } else if (file.type.includes("image")) {
+      } else if (file.type.includes('image')) {
         data = await processImage(file);
       } else {
         console.warn(`Skipping unsupported file type: ${file.type}`);
@@ -77,9 +76,9 @@ export const processFile = async (files: FileList | File) => {
   console.log('Merged data:', {
     productsCount: mergedData.products.length,
     customersCount: mergedData.customers.length,
-    invoicesCount: mergedData.invoices.length
+    invoicesCount: mergedData.invoices.length,
   });
-  
+
   return mergedData;
 };
 
@@ -96,7 +95,7 @@ const processExcel = async (
     reader.onload = (e) => {
       try {
         const data = new Uint8Array(e.target?.result as ArrayBuffer);
-        const workbook = XLSX.read(data, { type: "array" });
+        const workbook = XLSX.read(data, { type: 'array' });
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const rawData = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
 
@@ -106,43 +105,60 @@ const processExcel = async (
 
         rawData.forEach((row, index) => {
           // Extract values using multiple possible column names
-          const serialNumber = findValue(row, [
-            "Serial Number",
-            "SerialNumber",
-            "Invoice Number",
-            "Bill Number",
-          ]) || `INV-${index + 1}`;
+          const serialNumber =
+            findValue(row, [
+              'Serial Number',
+              'SerialNumber',
+              'Invoice Number',
+              'Bill Number',
+            ]) || `INV-${index + 1}`;
 
           const customerName = findValue(row, [
-            "Customer Name",
-            "Party Name",
-            "Client Name",
-            "Customer",
+            'Customer Name',
+            'Party Name',
+            'Client Name',
+            'Customer',
           ]);
 
           const companyName = findValue(row, [
-            "Company Name",
-            "Party Company Name",
-            "Organization",
-            "Business Name",
+            'Company Name',
+            'Party Company Name',
+            'Organization',
+            'Business Name',
           ]);
 
           const productName = findValue(row, [
-            "Product Name",
-            "Item Name",
-            "Description",
-            "Product",
+            'Product Name',
+            'Item Name',
+            'Description',
+            'Product',
           ]);
 
-          const quantity = findNumericValue(row, ["Quantity", "Qty", "Count"]) || 1;
-          const netAmount = findNumericValue(row, ["Net Amount", "Amount", "Price", "Unit Price"]);
-          const taxAmount = findNumericValue(row, ["Tax Amount", "Tax", "GST", "VAT"]);
-          const totalAmount = findNumericValue(row, ["Total Amount", "Total", "Gross Amount"]);
+          const quantity =
+            findNumericValue(row, ['Quantity', 'Qty', 'Count']) || 1;
+          const netAmount = findNumericValue(row, [
+            'Net Amount',
+            'Amount',
+            'Price',
+            'Unit Price',
+          ]);
+          const taxAmount = findNumericValue(row, [
+            'Tax Amount',
+            'Tax',
+            'GST',
+            'VAT',
+          ]);
+          const totalAmount = findNumericValue(row, [
+            'Total Amount',
+            'Total',
+            'Gross Amount',
+          ]);
 
           // Create customer key and name
-          const fullCustomerName = companyName && customerName 
-            ? `${companyName} - ${customerName}`
-            : companyName || customerName || "Unknown Customer";
+          const fullCustomerName =
+            companyName && customerName
+              ? `${companyName} - ${customerName}`
+              : companyName || customerName || 'Unknown Customer';
 
           // Create or update customer
           if (!customersMap.has(fullCustomerName)) {
@@ -150,7 +166,8 @@ const processExcel = async (
               id: `customer-${index}`,
               name: customerName,
               companyName: companyName || 'N/A',
-              phoneNumber: findValue(row, ["Phone", "Phone Number", "Contact"]) || "N/A",
+              phoneNumber:
+                findValue(row, ['Phone', 'Phone Number', 'Contact']) || 'N/A',
               totalPurchaseAmount: totalAmount,
             };
             customersMap.set(fullCustomerName, customer);
@@ -182,8 +199,8 @@ const processExcel = async (
             quantity: quantity,
             tax: taxAmount,
             totalAmount: totalAmount,
-            date: findValue(row, ["Date", "Invoice Date"]) 
-              ? new Date(findValue(row, ["Date", "Invoice Date"])).toISOString()
+            date: findValue(row, ['Date', 'Invoice Date'])
+              ? new Date(findValue(row, ['Date', 'Invoice Date'])).toISOString()
               : new Date().toISOString(),
           };
           invoices.push(invoice);
@@ -195,25 +212,27 @@ const processExcel = async (
           invoices,
         });
       } catch (error) {
-        console.error("Excel processing error:", error);
+        console.error('Excel processing error:', error);
         reject(error);
       }
     };
 
-    reader.onerror = () => reject(new Error("Failed to read Excel file"));
+    reader.onerror = () => reject(new Error('Failed to read Excel file'));
     reader.readAsArrayBuffer(file);
   });
 };
 
 const processPDF = async (file: File) => {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append('file', file);
   const response = await fetch(urls.transcribePdf, {
-    method: "POST",
+    method: 'POST',
     body: formData,
-  }).catch(error => {
+  }).catch((error) => {
     console.error('Network error:', error);
-    throw new Error('Failed to connect to server. Please check if the backend is running.');
+    throw new Error(
+      'Failed to connect to server. Please check if the backend is running.'
+    );
   });
   const data = await response.json();
 
@@ -224,7 +243,7 @@ const processPDF = async (file: File) => {
         id: product.id || `product-${index}`,
         name: product.name || product.productName, // handle both name formats
       }))
-    : [{ ...data.ProductsTab, id: "product-0" }];
+    : [{ ...data.ProductsTab, id: 'product-0' }];
 
   const customers = Array.isArray(data.CustomersTab)
     ? data.CustomersTab.map((customer: any, index: number) => ({
@@ -232,30 +251,38 @@ const processPDF = async (file: File) => {
         id: customer.id || `customer-${index}`,
         name: customer.customerName || customer.name, // handle both name formats
       }))
-    : [{ ...data.CustomersTab, id: "customer-0" }];
+    : [{ ...data.CustomersTab, id: 'customer-0' }];
 
   // Helper function to generate unique IDs
-  const generateUniqueId = (prefix: string, index: number) => 
+  const generateUniqueId = (prefix: string, index: number) =>
     `${prefix}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   // Then create invoices with proper relationships
   const invoices = Array.isArray(data.InvoicesTab)
     ? data.InvoicesTab.map((invoice: any, index: number) => {
-        const matchedProduct = products.find((p: Product) => p.name === invoice.productName);
-        const matchedCustomer = customers.find((c: Customer) => c.name === invoice.customerName);
+        const matchedProduct = products.find(
+          (p: Product) => p.name === invoice.productName
+        );
+        const matchedCustomer = customers.find(
+          (c: Customer) => c.name === invoice.customerName
+        );
         return {
           ...invoice,
           id: invoice.id || generateUniqueId('invoice', index),
-          productId: matchedProduct?.id || generateUniqueId('product-unknown', index),
-          customerId: matchedCustomer?.id || generateUniqueId('customer-unknown', index)
+          productId:
+            matchedProduct?.id || generateUniqueId('product-unknown', index),
+          customerId:
+            matchedCustomer?.id || generateUniqueId('customer-unknown', index),
         };
       })
-    : [{
-        ...data.InvoicesTab,
-        id: generateUniqueId('invoice', 0),
-        productId: generateUniqueId('product', 0),
-        customerId: generateUniqueId('customer', 0)
-      }];
+    : [
+        {
+          ...data.InvoicesTab,
+          id: generateUniqueId('invoice', 0),
+          productId: generateUniqueId('product', 0),
+          customerId: generateUniqueId('customer', 0),
+        },
+      ];
 
   return { products, customers, invoices };
 };
@@ -263,18 +290,22 @@ const processPDF = async (file: File) => {
 const processImage = async (file: File) => {
   try {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
     const response = await fetch(urls.transcribeImage, {
-      method: "POST",
+      method: 'POST',
       body: formData,
-    }).catch(error => {
+    }).catch((error) => {
       console.error('Network error:', error);
-      throw new Error('Failed to connect to server. Please check if the backend is running.');
+      throw new Error(
+        'Failed to connect to server. Please check if the backend is running.'
+      );
     });
 
     if (!response.ok) {
-      throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Server error: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.json();
@@ -292,19 +323,26 @@ const processImage = async (file: File) => {
           quantity: Number(product.quantity) || 0,
           unitPrice: Number(product.unitPrice) || 0,
           tax: Number(product.tax) || 0,
-          priceWithTax: Number(product.priceWithTax) || 
-            (product.unitPrice * (1 + (product.tax || 0) / 100)) || 0
+          priceWithTax:
+            Number(product.priceWithTax) ||
+            product.unitPrice * (1 + (product.tax || 0) / 100) ||
+            0,
         }))
-      : data.ProductsTab 
-        ? [{ 
-            ...data.ProductsTab, 
-            id: "product-0",
-            quantity: Number(data.ProductsTab.quantity) || 0,
-            unitPrice: Number(data.ProductsTab.unitPrice) || 0,
-            tax: Number(data.ProductsTab.tax) || 0,
-            priceWithTax: Number(data.ProductsTab.priceWithTax) || 
-              (data.ProductsTab.unitPrice * (1 + (data.ProductsTab.tax || 0) / 100)) || 0
-          }]
+      : data.ProductsTab
+        ? [
+            {
+              ...data.ProductsTab,
+              id: 'product-0',
+              quantity: Number(data.ProductsTab.quantity) || 0,
+              unitPrice: Number(data.ProductsTab.unitPrice) || 0,
+              tax: Number(data.ProductsTab.tax) || 0,
+              priceWithTax:
+                Number(data.ProductsTab.priceWithTax) ||
+                data.ProductsTab.unitPrice *
+                  (1 + (data.ProductsTab.tax || 0) / 100) ||
+                0,
+            },
+          ]
         : [];
 
     const customers = Array.isArray(data.CustomersTab)
@@ -313,31 +351,41 @@ const processImage = async (file: File) => {
           id: customer.id || `customer-${index}`,
           name: customer.name || customer.customerName, // handle both name formats
           phoneNumber: customer.phoneNumber || 'N/A',
-          totalPurchaseAmount: Number(customer.totalPurchaseAmount) || 0
+          totalPurchaseAmount: Number(customer.totalPurchaseAmount) || 0,
         }))
       : data.CustomersTab
-        ? [{
-            ...data.CustomersTab,
-            id: "customer-0",
-            phoneNumber: data.CustomersTab.phoneNumber || 'N/A',
-            totalPurchaseAmount: Number(data.CustomersTab.totalPurchaseAmount) || 0
-          }]
+        ? [
+            {
+              ...data.CustomersTab,
+              id: 'customer-0',
+              phoneNumber: data.CustomersTab.phoneNumber || 'N/A',
+              totalPurchaseAmount:
+                Number(data.CustomersTab.totalPurchaseAmount) || 0,
+            },
+          ]
         : [];
 
     // Helper function to generate unique IDs
-    const generateUniqueId = (prefix: string, index: number) => 
+    const generateUniqueId = (prefix: string, index: number) =>
       `${prefix}-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Then create invoices with proper relationships
     const invoices = Array.isArray(data.InvoicesTab)
       ? data.InvoicesTab.map((invoice: any, index: number) => {
-          const matchedProduct = products.find((p: Product) => p.name === invoice.productName);
-          const matchedCustomer = customers.find((c: Customer) => c.name === invoice.customerName);
+          const matchedProduct = products.find(
+            (p: Product) => p.name === invoice.productName
+          );
+          const matchedCustomer = customers.find(
+            (c: Customer) => c.name === invoice.customerName
+          );
           return {
             ...invoice,
             id: invoice.id || generateUniqueId('invoice', index),
-            productId: matchedProduct?.id || generateUniqueId('product-unknown', index),
-            customerId: matchedCustomer?.id || generateUniqueId('customer-unknown', index)
+            productId:
+              matchedProduct?.id || generateUniqueId('product-unknown', index),
+            customerId:
+              matchedCustomer?.id ||
+              generateUniqueId('customer-unknown', index),
           };
         })
       : [];
@@ -348,8 +396,13 @@ const processImage = async (file: File) => {
   } catch (error) {
     console.error('Image processing error:', error);
     if (error instanceof Error) {
-      if (error.message.includes('Failed to fetch') || error.message.includes('connect')) {
-        throw new Error('Unable to connect to server. Please ensure the backend service is running.');
+      if (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('connect')
+      ) {
+        throw new Error(
+          'Unable to connect to server. Please ensure the backend service is running.'
+        );
       }
       throw error;
     }
@@ -371,21 +424,30 @@ export const validateData = (data: {
     if (product.quantity === undefined) missingFields.push('quantity');
     if (product.unitPrice === undefined) missingFields.push('unit price');
     if (product.tax === undefined) missingFields.push('tax');
-    if (product.priceWithTax === undefined) missingFields.push('price with tax');
+    if (product.priceWithTax === undefined)
+      missingFields.push('price with tax');
 
     if (missingFields.length > 0) {
-      errors.push(`Missing fields for product ${product.id}: ${missingFields.join(', ')}`);
+      errors.push(
+        `Missing fields for product ${product.id}: ${missingFields.join(', ')}`
+      );
     }
 
     // Validate existing fields
     if (product.quantity < 0) {
-      errors.push(`Invalid quantity for product: ${product.name || product.id}`);
+      errors.push(
+        `Invalid quantity for product: ${product.name || product.id}`
+      );
     }
     if (product.unitPrice < 0) {
-      errors.push(`Invalid unit price for product: ${product.name || product.id}`);
+      errors.push(
+        `Invalid unit price for product: ${product.name || product.id}`
+      );
     }
     if (product.tax < 0) {
-      errors.push(`Invalid tax percentage for product: ${product.name || product.id}`);
+      errors.push(
+        `Invalid tax percentage for product: ${product.name || product.id}`
+      );
     }
   });
 
@@ -396,19 +458,26 @@ export const validateData = (data: {
     if (!customer.phoneNumber?.trim()) missingFields.push('phone number');
     if (!customer.email?.trim()) missingFields.push('email');
     if (!customer.address?.trim()) missingFields.push('address');
-    if (customer.totalPurchaseAmount === undefined) missingFields.push('total purchase amount');
+    if (customer.totalPurchaseAmount === undefined)
+      missingFields.push('total purchase amount');
 
     if (missingFields.length > 0) {
-      errors.push(`Missing fields for customer ${customer.id}: ${missingFields.join(', ')}`);
+      errors.push(
+        `Missing fields for customer ${customer.id}: ${missingFields.join(', ')}`
+      );
     }
 
     // Validate existing fields
     if (customer.totalPurchaseAmount < 0) {
-      errors.push(`Invalid total purchase amount for customer: ${customer.name || customer.id}`);
+      errors.push(
+        `Invalid total purchase amount for customer: ${customer.name || customer.id}`
+      );
     }
     // Validate email format if present
     if (customer.email && !isValidEmail(customer.email)) {
-      errors.push(`Invalid email format for customer: ${customer.name || customer.id}`);
+      errors.push(
+        `Invalid email format for customer: ${customer.name || customer.id}`
+      );
     }
   });
 
@@ -426,18 +495,26 @@ export const validateData = (data: {
     if (!invoice.date) missingFields.push('date');
 
     if (missingFields.length > 0) {
-      errors.push(`Missing fields for invoice ${invoice.id}: ${missingFields.join(', ')}`);
+      errors.push(
+        `Missing fields for invoice ${invoice.id}: ${missingFields.join(', ')}`
+      );
     }
 
     // Validate existing fields
     if (invoice.quantity <= 0) {
-      errors.push(`Invalid quantity for invoice: ${invoice.serialNumber || invoice.id}`);
+      errors.push(
+        `Invalid quantity for invoice: ${invoice.serialNumber || invoice.id}`
+      );
     }
     if (invoice.tax < 0) {
-      errors.push(`Invalid tax for invoice: ${invoice.serialNumber || invoice.id}`);
+      errors.push(
+        `Invalid tax for invoice: ${invoice.serialNumber || invoice.id}`
+      );
     }
     if (invoice.totalAmount < 0) {
-      errors.push(`Invalid total amount for invoice: ${invoice.serialNumber || invoice.id}`);
+      errors.push(
+        `Invalid total amount for invoice: ${invoice.serialNumber || invoice.id}`
+      );
     }
   });
 

@@ -25,21 +25,29 @@ const invoicesSlice = createSlice({
       state.items.push(action.payload);
     },
     updateInvoice: (state, action: PayloadAction<Invoice>) => {
-      const index = state.items.findIndex(item => item.id === action.payload.id);
+      const index = state.items.findIndex(
+        (item) => item.id === action.payload.id
+      );
       if (index !== -1) {
         state.items[index] = action.payload;
       }
     },
-    updateInvoicesByProduct: (state, action: PayloadAction<{ productId: string; updates: Partial<Invoice> }>) => {
-      state.items = state.items.map(invoice => {
+    updateInvoicesByProduct: (
+      state,
+      action: PayloadAction<{ productId: string; updates: Partial<Invoice> }>
+    ) => {
+      state.items = state.items.map((invoice) => {
         if (invoice.productId === action.payload.productId) {
           return { ...invoice, ...action.payload.updates };
         }
         return invoice;
       });
     },
-    updateInvoicesByCustomer: (state, action: PayloadAction<{ customerId: string; updates: Partial<Invoice> }>) => {
-      state.items = state.items.map(invoice => {
+    updateInvoicesByCustomer: (
+      state,
+      action: PayloadAction<{ customerId: string; updates: Partial<Invoice> }>
+    ) => {
+      state.items = state.items.map((invoice) => {
         if (invoice.customerId === action.payload.customerId) {
           return { ...invoice, ...action.payload.updates };
         }

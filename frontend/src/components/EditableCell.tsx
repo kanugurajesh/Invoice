@@ -9,7 +9,11 @@ interface EditableCellProps {
 }
 
 // Component for editing a cell in a table
-const EditableCell: React.FC<EditableCellProps> = ({ value, onSave, type = 'text' }) => {
+const EditableCell: React.FC<EditableCellProps> = ({
+  value,
+  onSave,
+  type = 'text',
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
 
