@@ -211,6 +211,9 @@ const processPDF = async (file: File) => {
   const response = await fetch(urls.transcribePdf, {
     method: "POST",
     body: formData,
+  }).catch(error => {
+    console.error('Network error:', error);
+    throw new Error('Failed to connect to server. Please check if the backend is running.');
   });
   const data = await response.json();
 

@@ -6,13 +6,11 @@ import path from 'path';
 
 const app = express();
 
-// Enable CORS
+// Enable CORS for all origins
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-    ],
-    methods: ['GET', 'POST'],
-    credentials: true
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Parse JSON bodies
