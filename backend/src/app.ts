@@ -8,7 +8,11 @@ const app = express();
 
 // Enable CORS
 app.use(cors({
-    origin: '*'
+    origin: [
+        'http://localhost:5173',
+    ],
+    methods: ['GET', 'POST'],
+    credentials: true
 }));
 
 // Parse JSON bodies
