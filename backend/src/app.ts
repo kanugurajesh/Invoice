@@ -9,8 +9,8 @@ const app = express();
 // Configure CORS for frontend access
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Frontend URL
-    // origin: 'https://invoice-kc4j.vercel.app',  // Frontend URL
+    // origin: 'http://localhost:5173', // Frontend URL
+    origin: 'https://invoice-kc4j.vercel.app',  // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
