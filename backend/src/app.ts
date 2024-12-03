@@ -7,7 +7,9 @@ import path from 'path';
 const app = express();
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+    origin: '*'
+}));
 
 // Parse JSON bodies
 app.use(express.json());
