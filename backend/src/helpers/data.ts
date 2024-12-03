@@ -1,3 +1,4 @@
+// Prompt template for AI data extraction
 export const extractDataPrompt = `
 You are an AI assistant that extracts structured data from documents. 
 For the given document (PDF or image), extract the following information and return it in JSON format:

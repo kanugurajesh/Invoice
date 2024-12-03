@@ -7,6 +7,7 @@ import DataTable from "./DataTable";
 import EditableCell from "./EditableCell";
 import { Product } from '../types';
 
+// Component for displaying and managing product data
 const ProductsTab: React.FC = () => {
   const dispatch = useDispatch();
   const products = useSelector((state: RootState) => {
@@ -31,6 +32,7 @@ const ProductsTab: React.FC = () => {
     );
   }
 
+  // Handle updates to product data
   const handleUpdate = (productId: string, field: string, value: any) => {
     const product = products.find((p) => p.id === productId);
     if (!product) return;

@@ -17,6 +17,7 @@ const initialState: ProductsState = {
   incompleteProducts: [],
 };
 
+// Function to validate product data
 const validateProduct = (product: Product): string[] => {
   const errors: string[] = [];
   if (!product.name?.trim()) errors.push('Product name is required');
@@ -26,10 +27,12 @@ const validateProduct = (product: Product): string[] => {
   return errors;
 };
 
+// Slice for managing product data
 const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
+    // Action to set the products array
     setProducts: (state, action: PayloadAction<Product[]>) => {
       state.items = action.payload;
       state.validationErrors = {};
@@ -43,6 +46,7 @@ const productsSlice = createSlice({
         }
       });
     },
+    // Action to add a new product
     addProduct: (state, action: PayloadAction<Product>) => {
       const errors = validateProduct(action.payload);
       if (errors.length > 0) {
@@ -54,6 +58,7 @@ const productsSlice = createSlice({
       }
       state.items.push(action.payload);
     },
+    // Action to update a product
     updateProduct: (state, action: PayloadAction<Product>) => {
       const index = state.items.findIndex(item => item.id === action.payload.id);
       if (index !== -1) {
@@ -77,6 +82,7 @@ const productsSlice = createSlice({
         state.items[index] = updatedProduct;
       }
     },
+    // Action to set the loading state
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },

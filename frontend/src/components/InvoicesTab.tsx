@@ -12,6 +12,7 @@ import {
   selectFlattenedCustomers 
 } from "../store/selectors";
 
+// Component for displaying and managing invoice data
 const InvoicesTab: React.FC = () => {
   const dispatch = useDispatch();
   const invoices = useSelector(selectFlattenedInvoices);
@@ -20,6 +21,7 @@ const InvoicesTab: React.FC = () => {
 
   console.log('Current state:', { invoices, products, customers });
 
+  // Handle updates to invoice data
   const handleUpdate = useCallback((invoiceId: string, field: string, value: any) => {
     console.log('Handling update:', { invoiceId, field, value });
     

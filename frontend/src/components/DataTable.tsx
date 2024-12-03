@@ -1,16 +1,19 @@
 import React from 'react';
 
+// Interface for column definitions
 interface Column {
   key: string;
   header: string;
   render?: (value: any, row: any) => React.ReactNode;
 }
 
+// Interface for DataTable component props
 interface DataTableProps {
   data: any[];
   columns: Column[];
 }
 
+// Component for displaying data in a table
 const DataTable: React.FC<DataTableProps> = ({ data, columns }) => {
   return (
     <div className="overflow-x-auto">

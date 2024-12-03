@@ -13,6 +13,7 @@ const initialState: InvoicesState = {
   error: null,
 };
 
+// slice for managing invoice data
 const invoicesSlice = createSlice({
   name: 'invoices',
   initialState,

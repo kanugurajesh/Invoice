@@ -7,8 +7,11 @@ import DataTable from './DataTable';
 import EditableCell from './EditableCell';
 import { Customer } from '../types';
 
+// Component for displaying and managing customer data
 const CustomersTab: React.FC = () => {
   const dispatch = useDispatch();
+  
+  // Get flattened customer data from Redux store
   const customers = useSelector((state: RootState) => {
     const items = state.customers.items;
     const flattenedItems = items.flat();
@@ -16,14 +19,16 @@ const CustomersTab: React.FC = () => {
     return flattenedItems;
   });
 
+  // Handle updates to customer data
   const handleUpdate = (customerId: string, field: string, value: any) => {
     const customer = customers.find(c => c.id === customerId);
     if (!customer) return;
 
+    // Update customer in store
     const updatedCustomer = { ...customer, [field]: value };
     dispatch(updateCustomer(updatedCustomer));
 
-    // Update related invoices
+    // Update related invoices if customer name changes
     if (field === 'name') {
       dispatch(updateInvoicesByCustomer({
         customerId,
@@ -32,6 +37,7 @@ const CustomersTab: React.FC = () => {
     }    
   };
 
+  // Column definitions for customer table
   const columns = [
     {
       key: 'name',
@@ -86,7 +92,7 @@ const CustomersTab: React.FC = () => {
     },
   ];
 
-  // Add debug render to check if we have data
+  // Render loading state if no customers
   if (!customers || customers.length === 0) {
     return (
       <div className="p-4">
@@ -96,6 +102,7 @@ const CustomersTab: React.FC = () => {
     );
   }
 
+  // Render customer table
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">Customers</h2>

@@ -13,6 +13,7 @@ const initialState: CustomersState = {
   error: null,
 };
 
+// slice for managing customer data
 const customersSlice = createSlice({
   name: 'customers',
   initialState,

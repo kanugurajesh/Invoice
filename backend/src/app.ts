@@ -6,27 +6,24 @@ import path from 'path';
 
 const app = express();
 
-// Enable CORS for all origins
+// Configure CORS for frontend access
 app.use(cors({
-    origin: 'https://invoice-kc4j.vercel.app/',
+    origin: 'https://invoice-kc4j.vercel.app/',  // Frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Parse JSON bodies
+// Middleware for parsing request bodies
 app.use(express.json());
-
-// Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Create uploads directory if it doesn't exist
+// Create uploads directory for file storage
 const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)){
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-// Use routes with /api prefix
-
+// Mount API routes
 app.use('/api', routes);
 
 export default app;

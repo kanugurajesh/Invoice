@@ -11,8 +11,10 @@ if (!process.env.GEMINI_API_KEY) {
   throw new Error('GEMINI_API_KEY is not set in environment variables');
 }
 
+// Initialize Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Get the Gemini 1.5 Flash model
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 const transcribePdf = async (req: Request, res: Response): Promise<void> => {
@@ -21,37 +23,47 @@ const transcribePdf = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  // Read the PDF file from the request
   const pdfBuffer = fs.readFileSync(req.file.path);
 
+  // Parse the PDF file
   const data = await pdf(pdfBuffer);
 
+  // Extracting the text from the PDF
   const text = data.text;
 
+  // Clean up the temporary file
   fs.unlinkSync(req.file.path);
 
+  // Make API request to Gemini 1.5 Flash model
   const response = await model.generateContent(extractDataPrompt + text);
 
   const extractedData = response.response.text();
 
   console.log(extractedData);
 
+  // Parse the extracted data to JSON
   const jsonString = JSON.parse(
     extractedData.slice(8, extractedData.length - 4)
   );
 
+  // check if there is an error in the response
   if (jsonString.error) {
     res.json({ message: jsonString.error });
     return;
   }
 
+  // send the json response to the client
   res.json(jsonString);
 
   return;
   
 };
 
+// Initializing the Vision model
 const visionModel = genAI.getGenerativeModel({ model: 'models/gemini-1.5-pro' });
 
+// Function to extract data from an image
 const transcribeImage = async (req: Request, res: Response): Promise<void> => {
   let filePath: string | null = null;
   

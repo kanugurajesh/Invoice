@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Edit2, Check, X } from 'lucide-react';
 
+// Interface for EditableCell component props
 interface EditableCellProps {
   value: string | number;
   onSave: (newValue: string | number) => void;
   type?: 'text' | 'number';
 }
 
+// Component for editing a cell in a table
 const EditableCell: React.FC<EditableCellProps> = ({ value, onSave, type = 'text' }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);

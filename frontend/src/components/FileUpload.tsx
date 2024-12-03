@@ -15,6 +15,7 @@ interface ProcessedData {
   invoices: Invoice[];
 }
 
+// component for uploading files and processing them
 const FileUpload: React.FC = () => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
