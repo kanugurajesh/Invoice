@@ -148,7 +148,8 @@ const processExcel = async (
           if (!customersMap.has(fullCustomerName)) {
             const customer: Customer = {
               id: `customer-${index}`,
-              name: fullCustomerName,
+              name: customerName,
+              companyName: companyName || 'N/A',
               phoneNumber: findValue(row, ["Phone", "Phone Number", "Contact"]) || "N/A",
               totalPurchaseAmount: totalAmount,
             };

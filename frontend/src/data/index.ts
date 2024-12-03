@@ -1,9 +1,8 @@
-const BASE_URL = 'http://localhost:3000/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const urls = {
-    transcribePdf: `${BASE_URL}/transcribe/pdf`,
-    transcribeExcel: `${BASE_URL}/transcribe/excel`,
-    transcribeImage: `${BASE_URL}/transcribe/image`,
+    transcribePdf: `${BASE_URL}${import.meta.env.VITE_TRANSCRIBE_PDF_URL}`,
+    transcribeImage: `${BASE_URL}${import.meta.env.VITE_TRANSCRIBE_IMAGE_URL}`,
 }
 
 export default urls;
