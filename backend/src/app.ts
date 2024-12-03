@@ -26,6 +26,7 @@ if (!fs.existsSync(uploadsDir)){
 }
 
 // Use routes with /api prefix
+
 app.use('/api', routes);
 
 export default app;
