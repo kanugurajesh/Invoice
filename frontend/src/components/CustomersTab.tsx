@@ -32,7 +32,7 @@ const CustomersTab: React.FC = () => {
     dispatch(
       updateInvoicesByCustomer({
         customerId,
-        updates: { customerName: value },
+        updates: { [field]: value },
       })
     );
   };

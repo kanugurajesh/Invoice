@@ -44,7 +44,7 @@ const ProductsTab: React.FC = () => {
     dispatch(
       updateInvoicesByProduct({
         productId,
-        updates: { productName: value },
+        updates: { [field]: value },
       })
     );
   };
