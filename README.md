@@ -69,6 +69,8 @@ Video Link :- https://youtu.be/XNAYFbIKPXA
    cd frontend
    npm install
    cd ../backend
+   create .env file and add the following environment variable
+   GEMINI_API_KEY=
    npm install
    ```
 
