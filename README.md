@@ -1,3 +1,5 @@
+When making the request the backend may give response with some delay this is due to the backend is deployed on render.com which spins down the server if it not used but once you send a request the server spins up and the delay won't be there for the consequent request
+
 # Automated Data Extraction and Invoice Management System
 
 A React-based application for Swipe that automates the extraction, processing, and management of invoice data from various file formats. The application organizes extracted data into three main sections: Invoices, Products, and Customers, with real-time synchronization using Redux.
