@@ -70,6 +70,7 @@ Video Link :- https://youtu.be/XNAYFbIKPXA
    ```bash
    cd frontend
    npm install
+   create .env file and add the following environment variable. in VITE_API_URL add link of the hosted backend
    cd ../backend
    create .env file and add the following environment variable
    GEMINI_API_KEY=
